@@ -24,7 +24,10 @@
             :src="mock.author.image"
             class="rounded-full w-[35px] lg:w-[50px] aspect-square"
           />
-          <div class="font-bold text-sm leading-none">{{ mock.author.name }}</div>
+          <div
+            class="font-bold text-sm leading-none"
+            v-html="mock.author.name"
+          ></div>
           <a
             v-for="social in mock.author.socials"
             :href="social.type"
@@ -34,7 +37,10 @@
               v-if="Socials[social.type]"
               :src="Socials[social.type]"
             />
-            <div v-else>{{ social.type }}</div>
+            <div
+              v-else
+              v-html="social.type"
+            ></div>
           </a>
         </div>
 
@@ -42,7 +48,7 @@
           v-for="item in mock.author.boolFields"
           class="flex flex-row items-center gap-x-[10px] text-xs leading-none"
         >
-          {{ item.text }}
+          <div v-html="item.text"></div>
           <img :src="item.is ? 'boolFieldYes.svg' : 'boolFieldNo.svg'" />
         </div>
       </div>
@@ -52,20 +58,102 @@
       >
         <div class="flex flex-col text-xs leading-4">
           <div class="text-[#686868]">Balance</div>
-          <div class="font-bold">{{ mock.stats.balance }} {{ mock.stats.currency }}</div>
+          <div
+            class="font-bold"
+            v-html="`${mock.stats.balance} ${mock.stats.currency}`"
+          ></div>
         </div>
         <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
         <div class="flex flex-col text-xs leading-4">
           <div class="text-[#686868]">Withdraw</div>
-          <div class="font-bold">{{ mock.stats.withdrawn }} {{ mock.stats.currency }}</div>
+          <div
+            class="font-bold"
+            v-html="`${mock.stats.withdrawn} ${mock.stats.currency}`"
+          ></div>
         </div>
         <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
         <div class="flex flex-col text-xs leading-4">
           <div class="text-[#686868]">Goal</div>
-          <div class="font-bold">{{ mock.stats.goal }} {{ mock.stats.currency }}</div>
+          <div
+            class="font-bold"
+            v-html="`${mock.stats.goal} ${mock.stats.currency}`"
+          ></div>
         </div>
       </div>
     </div>
+
+    <div class="gradient-block rounded-[20px] p-5 w-full flex flex-col gap-6 justify-center items-center">
+      <div
+        class="font-bold text-base"
+        v-html="mock.contribution.title"
+      ></div>
+      <div class="font-bold flex flex-col gap-[10px] justify-center items-center leading-none text-[#8F8F8F]">
+        <div
+          class="text-[30px]"
+          v-html="`${amount} ${mock.stats.currency}`"
+        ></div>
+        <div
+          class="text-xs"
+          v-html="mock.contribution.fee"
+        ></div>
+      </div>
+      <div class="flex flex-row gap-[10px] justify-center items-center">
+        <div
+          class="p-[5px] rounded-[10px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs leading-none cursor-pointer"
+          v-for="option in mock.contribution.options"
+          :key="option.id"
+        >
+          <div
+            class="font-bold"
+            v-html="option.title"
+          ></div>
+          <div
+            class="text-[#8F8F8F]"
+            v-html="option.description"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <label class="w-full h-10 rounded-[5px] border border-[#8F8F8F] py-[10px] px-5 text-sm leading-5 cursor-text">
+      <input
+        type="text"
+        class="placeholder:text-black w-full h-full"
+        :placeholder="mock.contribution.field1Placeholder"
+        v-model="field1"
+      />
+    </label>
+
+    <label class="w-full h-10 rounded-[5px] border border-[#8F8F8F] py-[10px] px-5 text-sm leading-5 cursor-text">
+      <input
+        type="text"
+        class="placeholder:text-black w-full h-full"
+        :placeholder="mock.contribution.field2Placeholder"
+        v-model="field2"
+      />
+    </label>
+
+    <div
+      class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center"
+      v-html="mock.contribution.buttonText"
+    ></div>
+
+    <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
+
+    <div class="flex flex-row gap-[10px] justify-center items-center cursor-pointer">
+      <img src="@/assets/contribution.svg" />
+      <div
+        class="text-sm font-bold leading-5 text-[#8F8F8F]"
+        v-html="mock.contribution.contributionsText"
+      ></div>
+    </div>
+
+    <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
+
+    <div
+      class="text-xs leading-4 text-center"
+      v-html="mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.text"
+    ></div>
   </main>
 </template>
 
@@ -75,9 +163,20 @@
 >
 import { mock } from '@/utils/mocks';
 import { Socials } from '@/utils/socials';
+import { ref } from 'vue';
+
+const amount = ref(0),
+  field1 = ref(""),
+  field2 = ref("")
 </script>
 
 <style
   lang="scss"
   scoped
-></style>
+>
+.gradient-block {
+  border: 3px solid transparent;
+  background: linear-gradient(0deg, #fff, #fff) padding-box,
+    linear-gradient(90.96deg, #59B4F8 0.96%, #D917BC 101.76%) border-box;
+}
+</style>

@@ -74,7 +74,7 @@ export const mock = new Index(
     goal: 1_000_000
   },
   {
-    title: "Top up amount",
+    title: "Top up amount 💸",
     fee: "+0.001 SOL processing fee",
     options: [
       {
