@@ -60,7 +60,7 @@
           <div class="text-[#686868]">Balance</div>
           <div
             class="font-bold"
-            v-html="`${mock.stats.balance} ${mock.stats.currency}`"
+            v-html="`${useFormatter(mock.stats.balance)} ${mock.stats.currency}`"
           ></div>
         </div>
         <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
@@ -68,7 +68,7 @@
           <div class="text-[#686868]">Withdraw</div>
           <div
             class="font-bold"
-            v-html="`${mock.stats.withdrawn} ${mock.stats.currency}`"
+            v-html="`${useFormatter(mock.stats.withdrawn)} ${mock.stats.currency}`"
           ></div>
         </div>
         <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
@@ -76,7 +76,7 @@
           <div class="text-[#686868]">Goal</div>
           <div
             class="font-bold"
-            v-html="`${mock.stats.goal} ${mock.stats.currency}`"
+            v-html="`${useFormatter(mock.stats.goal)} ${mock.stats.currency}`"
           ></div>
         </div>
       </div>
@@ -88,10 +88,15 @@
         v-html="mock.contribution.title"
       ></div>
       <div class="font-bold flex flex-col gap-[10px] justify-center items-center leading-none text-[#8F8F8F]">
-        <div
-          class="text-[30px]"
-          v-html="`${amount} ${mock.stats.currency}`"
-        ></div>
+        <label class="text-[30px] flex flex-row gap-[1ch]">
+          <div
+            contenteditable
+            inputmode="decimal"
+            ref="amountInput"
+            @keydown="applyAmount($event)"
+          ></div>
+          <div v-html="mock.stats.currency"></div>
+        </label>
         <div
           class="text-xs"
           v-html="mock.contribution.fee"
@@ -102,6 +107,7 @@
           class="p-[5px] rounded-[10px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs leading-none cursor-pointer"
           v-for="option in mock.contribution.options"
           :key="option.id"
+          @click="amount += option.action()"
         >
           <div
             class="font-bold"
@@ -161,13 +167,26 @@
   setup
   lang="ts"
 >
+import { useFormatter } from '@/composables/currencyFormatter';
 import { mock } from '@/utils/mocks';
 import { Socials } from '@/utils/socials';
-import { ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 
 const amount = ref(0),
   field1 = ref(""),
-  field2 = ref("")
+  field2 = ref(""),
+  amountInput = ref()
+
+watch(amountInput, () => {
+  amountInput.value.innerText = '0';
+}, { once: true })
+
+const applyAmount = (e: Event) => {
+  console.log(amount.value, amountInput.value.innerText);
+  amount.value = +(e.target as HTMLDivElement).innerText.replace(/\,/, '')
+  amountInput.value.innerText = useFormatter(amount.value);
+  console.log(amount.value, amountInput.value.innerText);
+}
 </script>
 
 <style

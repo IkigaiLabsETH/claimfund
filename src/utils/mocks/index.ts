@@ -29,7 +29,8 @@ class Index {
       options: Array<{
         id: string,
         title: string,
-        description: string
+        description: string,
+        action: Function
       }>,
       field1Placeholder: string,
       field2Placeholder: string,
@@ -80,17 +81,20 @@ export const mock = new Index(
       {
         id: "0",
         title: "+5 USDC",
-        description: "(5$)"
+        description: "(5$)",
+        action: () => 5
       },
       {
         id: "1",
         title: "+25 USDC",
-        description: "(25$)"
+        description: "(25$)",
+        action: () => 25
       },
       {
         id: "2",
         title: "+50 USDC",
-        description: "(50$)"
+        description: "(50$)",
+        action: () => 50
       }
     ],
     field1Placeholder: "Your name (optional)",
