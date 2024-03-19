@@ -206,9 +206,9 @@
   lang="ts"
 >
 import { useFormatter } from '@/composables/currencyFormatter';
-import { mock } from '@/utils/mocks';
+import { mock } from '@/utils/mocks/create';
 import { Socials } from '@/utils/socials';
-import { nextTick, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const amount = ref(0),
   field1 = ref(""),

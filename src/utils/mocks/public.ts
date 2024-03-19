@@ -4,7 +4,6 @@ class Index {
     public image1: string,
     public image2: string,
     public description: string,
-
     public stats: {
       currency: string
       balance: number,
