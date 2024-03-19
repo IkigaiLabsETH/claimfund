@@ -61,7 +61,7 @@ export const mock = new Private(
       }, {
         text: "Copy link",
         actionLink: () => 'copy',
-        bgColor: "#00B0AF"
+        bgColor: "#F7931A"
       }
     ]
   },
