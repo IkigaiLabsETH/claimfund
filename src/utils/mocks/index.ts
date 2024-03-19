@@ -1,27 +1,16 @@
 class Index {
   constructor(
     public title: string,
-    public image: string,
+    public image1: string,
+    public image2: string,
     public description: string,
 
-    public author: {
-      image: string,
-      name: string,
-
-      socials: Array<{
-        type: 'X' | string,
-        link: URL
-      }>,
-      boolFields: Array<{
-        text: string,
-        is: boolean
-      }>
-    },
     public stats: {
       currency: string
       balance: number,
       withdrawn: number,
-      goal: number
+      goal: number,
+      host: string
     },
     public contribution: {
       title: string,
@@ -48,31 +37,16 @@ class Index {
 }
 
 export const mock = new Index(
-  "Claim Fund",
-  "jar.png",
   "Help for Ukraine.<br/>Charity fund to help military.",
-  {
-    image: "author.png",
-    name: "Mike",
-    socials: [{
-      type: 'X',
-      link: new URL("https://twitter.com/miketimashov")
-    }],
-    boolFields: [
-      {
-        text: "Verified",
-        is: true
-      }, {
-        text: "KYC",
-        is: false
-      }
-    ]
-  },
+  "image1.png",
+  "image2.png",
+  "Some description. Some description.<br/>Some description. Some description. Some description. Some description. Some description. ",
   {
     currency: "USDC",
     balance: 123_456,
     withdrawn: 0,
-    goal: 1_000_000
+    goal: 1_000_000,
+    host: '1234...abcd'
   },
   {
     title: "Top up amount 💸",
