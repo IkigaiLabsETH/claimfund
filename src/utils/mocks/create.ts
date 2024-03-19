@@ -43,8 +43,8 @@ export const mock = new Create(
   "image1.png",
   {
     welcomingPhrase: "Setup your Piggy Box",
-    titlePlaceholder: "title",
-    descriptionPlaceHolder: "description",
+    titlePlaceholder: "Title",
+    descriptionPlaceHolder: "Description",
     goalPlaceholder: "Goal",
     tokens: {
       placeholder: "Token",

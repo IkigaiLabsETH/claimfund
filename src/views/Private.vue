@@ -207,7 +207,6 @@
 >
 import { useFormatter } from '@/composables/currencyFormatter';
 import { mock } from '@/utils/mocks/private';
-import { Socials } from '@/utils/socials';
 import { ref, watch } from 'vue';
 
 const amount = ref(0),
