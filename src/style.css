@@ -5,3 +5,7 @@
 a {
   text-decoration: underline;
 }
+
+input, textarea, select, div[contenteditable] {
+  outline: none;
+}

@@ -32,7 +32,7 @@
               v-for="item in mock.shareTo.btns"
               class="p-[5px] text-white cursor-pointer"
               :style="`background-color: ${item.bgColor}`"
-              @click="item.actionLink"
+              @click="useShare(item.actionLink, mock.title)"
               v-html="item.text"
             ></div>
           </div>
@@ -102,9 +102,16 @@
         <div class="w-full h-[1px] bg-[#D7D7D7] shrink-0 lg:mx-[25px] lg:w-auto"></div>
 
         <div
+          v-if="!publicKey"
           class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto cursor-pointer"
           v-html="mock.claim.buttonText"
+          @click="openWalletModalProvider(walletModalProviderRef)"
         ></div>
+        <div
+          v-else
+          class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
+          @click="disconnect"
+        >{{ formatWallet(publicKey.toString()) }}</div>
 
         <div
           class="absolute bottom-[10px] left-[50px] right-[50px] font-bold text-lg leading-5 text-[#656565] text-center"
@@ -134,13 +141,19 @@
   lang="ts"
 >
 import { useFormatter } from '@/composables/currencyFormatter';
+import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/private';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
+import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
+import { useWallet } from 'solana-wallets-vue';
+import { formatWallet } from '@/composables/formatWallet';
 
 const amount = ref(0),
   field1 = ref(""),
   field2 = ref(""),
-  amountInput = ref()
+  amountInput = ref(),
+  walletModalProviderRef = inject('walletModalProviderRef'),
+  { publicKey, disconnect } = useWallet()
 
 watch(amountInput, () => {
   amountInput.value.innerText = '0';

@@ -37,7 +37,7 @@
                 v-for="item in mock.share.shareTo.btns"
                 class="p-[5px] text-white cursor-pointer"
                 :style="`background-color: ${item.bgColor}`"
-                @click="item.actionLink"
+                @click="useShare(item.actionLink, setup.title)"
                 v-html="item.text"
               ></div>
             </div>
@@ -86,7 +86,7 @@
                 <input
                   type="text"
                   :placeholder="mock.setup.goalPlaceholder"
-                  v-model="setup.title"
+                  v-model="setup.goal"
                   class="placeholder:text-[#8F8F8F] w-full h-auto"
                 />
               </label>
@@ -104,14 +104,29 @@
                 </select>
               </label>
             </div>
+            <label class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+              <input
+                type="text"
+                :placeholder="mock.setup.emailPlaceholder"
+                v-model="setup.email"
+                class="placeholder:text-[#8F8F8F] w-full h-auto"
+              />
+            </label>
           </div>
 
           <div class="w-full h-[1px] bg-[#D7D7D7]"></div>
 
           <div
+            v-if="!publicKey"
             class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:w-auto cursor-pointer"
             v-html="mock.setup.connectWalletBtnText"
+            @click="openWalletModalProvider(walletModalProviderRef)"
           ></div>
+          <div
+            v-else
+            class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
+            @click="disconnect"
+          >{{ formatWallet(publicKey.toString()) }}</div>
         </template>
         <template v-else-if="stage == 1">
           <SpinnerDiamond class="self-center" />
@@ -157,9 +172,12 @@
   lang="ts"
 >
 import SpinnerDiamond from '@/components/SpinnerDiamond.vue';
-import { useFormatter } from '@/composables/currencyFormatter';
+import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/create';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
+import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
+import { useWallet } from 'solana-wallets-vue';
+import { formatWallet } from '@/composables/formatWallet';
 
 const stage = ref(0),
   setup = ref({
@@ -168,5 +186,7 @@ const stage = ref(0),
     goal: "",
     token: "",
     email: ""
-  })
+  }),
+  walletModalProviderRef = inject('walletModalProviderRef'),
+  { publicKey, disconnect } = useWallet()
 </script>

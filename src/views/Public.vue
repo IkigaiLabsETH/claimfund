@@ -119,9 +119,16 @@
         </label>
 
         <div
+          v-if="!publicKey"
           class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
           v-html="mock.contribution.buttonText"
+          @click="openWalletModalProvider(walletModalProviderRef)"
         ></div>
+        <div
+          v-else
+          class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
+          @click="disconnect"
+        >{{ formatWallet(publicKey.toString()) }}</div>
 
         <div class="w-full h-[1px] bg-[#D7D7D7] shrink-0"></div>
 
@@ -159,22 +166,48 @@
 >
 import { useFormatter } from '@/composables/currencyFormatter';
 import { mock } from '@/utils/mocks/public';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
+import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
+import { formatWallet } from '@/composables/formatWallet'
+import { useWallet } from 'solana-wallets-vue';
 
 const amount = ref(0),
   field1 = ref(""),
   field2 = ref(""),
-  amountInput = ref()
+  amountInput = ref(),
+  walletModalProviderRef = inject('walletModalProviderRef'),
+  { publicKey, disconnect } = useWallet()
 
 watch(amountInput, () => {
   amountInput.value.innerText = '0';
 }, { once: true })
 
-const applyAmount = (e: Event) => {
-  console.log(amount.value, amountInput.value.innerText);
-  amount.value = +(e.target as HTMLDivElement).innerText.replace(/\,/, '')
-  amountInput.value.innerText = useFormatter(amount.value);
-  console.log(amount.value, amountInput.value.innerText);
+// TODO
+const applyAmount = (e: KeyboardEvent) => {
+
+  let checker = (code: string) => {
+    let codeWords = ['Arrow', 'Digit', 'Comma', 'Period', 'Backspace', 'Delete'],
+      res = false
+
+    codeWords.forEach(codeWord => {
+      if (code.includes(codeWord)) res = true;
+    })
+
+    return res
+  }
+
+  if (!checker(e.code)) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false;
+  }
+  else {
+    amount.value = +(e.target as HTMLDivElement).innerText.replace(/\,/, '')
+    amountInput.value.innerText = useFormatter(amount.value);
+  }
+  // @ts-ignore
+  console.log(e.target.textContent, amount.value);
 }
 </script>
 
