@@ -45,6 +45,7 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
+            @click="copy('https://claim.fund/box/{public key}')"
           >
             https://claim.fund/box/{public key}
             <img
@@ -65,35 +66,46 @@
             v-html="mock.setup.welcomingPhrase"
           ></div>
           <div class="flex flex-col gap-[10px]">
-            <label class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+            <label
+              class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center duration-200"
+            >
               <input
                 type="text"
                 :placeholder="mock.setup.titlePlaceholder"
                 v-model="setup.title"
-                class="placeholder:text-[#8F8F8F] w-full h-auto"
+                required
+                class="placeholder:text-[#8F8F8F] w-full h-auto duration-200"
               />
             </label>
-            <label class="w-full border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+            <label class="w-full border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center duration-200">
               <textarea
                 :placeholder="mock.setup.descriptionPlaceHolder"
                 v-model="setup.description"
-                class="placeholder:text-[#8F8F8F] w-full h-auto resize-none"
+                required
+                class="placeholder:text-[#8F8F8F] w-full h-auto resize-none duration-200"
                 rows="5"
               ></textarea>
             </label>
             <div class="flex flex-row gap-[inherit]">
-              <label class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+              <label
+                class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center duration-200"
+              >
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
                   :placeholder="mock.setup.goalPlaceholder"
                   v-model="setup.goal"
-                  class="placeholder:text-[#8F8F8F] w-full h-auto"
+                  required
+                  class="placeholder:text-[#8F8F8F] w-full h-auto duration-200"
                 />
               </label>
-              <label class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+              <label
+                class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center duration-200"
+              >
                 <select
                   v-model="setup.token"
-                  class="w-full h-auto bg-transparent"
+                  required
+                  class="w-full h-auto bg-transparent duration-200"
                   :class="{ 'text-[#8F8F8F]': setup.token == '' }"
                 >
                   <option value="">{{ mock.setup.tokens.placeholder }}</option>
@@ -104,12 +116,16 @@
                 </select>
               </label>
             </div>
-            <label class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center">
+            <label
+              class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex items-center duration-200"
+            >
               <input
                 type="text"
                 :placeholder="mock.setup.emailPlaceholder"
                 v-model="setup.email"
-                class="placeholder:text-[#8F8F8F] w-full h-auto"
+                :pattern="emailPattern.toString().slice(1,-1)"
+                required
+                class="placeholder:text-[#8F8F8F] w-full h-auto duration-200"
               />
             </label>
           </div>
@@ -125,8 +141,8 @@
           <div
             v-else
             class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
-            @click="disconnect"
-          >{{ formatWallet(publicKey.toString()) }}</div>
+            @click="create"
+          >Create a Piggy Box</div>
         </template>
         <template v-else-if="stage == 1">
           <SpinnerDiamond class="self-center" />
@@ -140,6 +156,7 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
+            @click="copy('https://claim.fund/manage/{private key}')"
           >
             https://claim.fund/manage/{private key}
             <img
@@ -177,7 +194,6 @@ import { mock } from '@/utils/mocks/create';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
-import { formatWallet } from '@/composables/formatWallet';
 
 const stage = ref(0),
   setup = ref({
@@ -187,6 +203,32 @@ const stage = ref(0),
     token: "",
     email: ""
   }),
+  emailPattern = /\S+@\S+\.\S+/,
   walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect } = useWallet()
+
+const create = () => {
+  if (
+    setup.value.title !== '' &&
+    setup.value.description !== '' &&
+    (+setup.value.goal > 0 && +setup.value.goal <= 9_999_999) &&
+    setup.value.token !== '' &&
+    (setup.value.email !== '' && setup.value.email.match(emailPattern))
+  ) {
+    stage.value = 1;
+    setTimeout(() => stage.value = 2, 3000);
+  }
+  else {
+    document.querySelectorAll("label").forEach(label => {
+      label.classList.add("has-[:invalid]:border-red-500")
+      label.children[0].classList.add("invalid:placeholder:text-red-600");
+    })
+  }
+}
+
+const copy = (str: string) => navigator.clipboard.writeText(str)
+
+watch(() => setup.value.goal, () => {
+  if (+setup.value.goal == 0) setup.value.goal = "";
+})
 </script>

@@ -64,12 +64,16 @@
           ></div>
           <div class="font-bold flex flex-col gap-[10px] justify-center items-center leading-none text-[#8F8F8F]">
             <label class="text-[30px] lg:text-[50px] leading-none flex flex-row gap-[1ch]">
-              <div
-                contenteditable
+              <input
+                type="number"
                 inputmode="decimal"
                 ref="amountInput"
-                @keydown="applyAmount($event)"
-              ></div>
+                @input="applyAmount"
+                v-model="amount"
+                min="0"
+                max="9999999"
+                class="w-[51px] h-[50px]"
+              />
               <div v-html="mock.stats.currency"></div>
             </label>
             <div
@@ -182,32 +186,11 @@ watch(amountInput, () => {
   amountInput.value.innerText = '0';
 }, { once: true })
 
-// TODO
-const applyAmount = (e: KeyboardEvent) => {
-
-  let checker = (code: string) => {
-    let codeWords = ['Arrow', 'Digit', 'Comma', 'Period', 'Backspace', 'Delete'],
-      res = false
-
-    codeWords.forEach(codeWord => {
-      if (code.includes(codeWord)) res = true;
-    })
-
-    return res
-  }
-
-  if (!checker(e.code)) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    return false;
-  }
-  else {
-    amount.value = +(e.target as HTMLDivElement).innerText.replace(/\,/, '')
-    amountInput.value.innerText = useFormatter(amount.value);
-  }
-  // @ts-ignore
-  console.log(e.target.textContent, amount.value);
+const applyAmount = () => {
+  console.log(amountInput.value.value > 9_999_999)
+  if(amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
+  amountInput.value.style.width = 0;
+  amountInput.value.style.width = amountInput.value.scrollWidth + 20 + "px";
 }
 </script>
 
