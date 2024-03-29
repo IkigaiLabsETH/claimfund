@@ -72,7 +72,7 @@
                 v-model="amount"
                 min="0"
                 max="9999999"
-                class="w-[51px] h-[50px]"
+                class="w-[41px] h-[50px]"
               />
               <div v-html="mock.stats.currency"></div>
             </label>
@@ -170,7 +170,7 @@
 >
 import { useFormatter } from '@/composables/currencyFormatter';
 import { mock } from '@/utils/mocks/public';
-import { inject, ref, watch } from 'vue';
+import { inject, nextTick, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
@@ -186,11 +186,16 @@ watch(amountInput, () => {
   amountInput.value.innerText = '0';
 }, { once: true })
 
+watch(amount, () => {
+  nextTick(() => {
+    amountInput.value.style.width = 0;
+    amountInput.value.style.width = amountInput.value.scrollWidth + 10 + "px";
+  })
+})
+
 const applyAmount = () => {
   console.log(amountInput.value.value > 9_999_999)
-  if(amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
-  amountInput.value.style.width = 0;
-  amountInput.value.style.width = amountInput.value.scrollWidth + 20 + "px";
+  if (amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
 }
 </script>
 
@@ -202,5 +207,17 @@ const applyAmount = () => {
   border: 3px solid transparent;
   background: linear-gradient(0deg, #fff, #fff) padding-box,
     linear-gradient(90.96deg, #59B4F8 0.96%, #D917BC 101.76%) border-box;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 </style>
