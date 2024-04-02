@@ -32,7 +32,7 @@
               v-for="item in mock.shareTo.btns"
               class="p-[5px] text-white cursor-pointer"
               :style="`background-color: ${item.bgColor}`"
-              @click="useShare(item.actionLink, mock.title)"
+              @click="useShare(item.actionLink, "", mock.title)"
               v-html="item.text"
             ></div>
           </div>
