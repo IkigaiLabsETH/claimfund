@@ -45,9 +45,11 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
-            @click="copy('https://claim.fund/box/{public key}')"
+            @click="copy(`https://claim.fund/box/${ownPublicKey}`)"
           >
-            https://claim.fund/box/{public key}
+            <div class="w-[inherit] overflow-hidden text-ellipsis">
+              https://claim.fund/box/{{ ownPublicKey }}
+            </div>
             <img
               src="@/assets/copy.svg"
               class="w-5 h-5"
@@ -95,7 +97,6 @@
                   min="0"
                   :placeholder="mock.setup.goalPlaceholder"
                   v-model="setup.goal"
-                  required
                   class="placeholder:text-[#8F8F8F] w-full h-auto duration-200"
                 />
               </label>
@@ -110,9 +111,9 @@
                 >
                   <option value="">{{ mock.setup.tokens.placeholder }}</option>
                   <option
-                    v-for="option in mock.setup.tokens.options"
-                    :value="option"
-                  >{{ option }}</option>
+                    v-for="option in kSupportedTokens"
+                    :value="option.mintAddress"
+                  >{{ option.name }}</option>
                 </select>
               </label>
             </div>
@@ -123,7 +124,7 @@
                 type="text"
                 :placeholder="mock.setup.emailPlaceholder"
                 v-model="setup.email"
-                :pattern="emailPattern.toString().slice(1,-1)"
+                :pattern="emailPattern.toString().slice(1, -1)"
                 required
                 class="placeholder:text-[#8F8F8F] w-full h-auto duration-200"
               />
@@ -156,9 +157,11 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
-            @click="copy('https://claim.fund/manage/{private key}')"
+            @click="copy(`https://claim.fund/manage/${ownPrivateKey}`)"
           >
-            https://claim.fund/manage/{private key}
+            <div class="w-[inherit] overflow-hidden text-ellipsis">
+              https://claim.fund/manage/{{ ownPrivateKey }}
+            </div>
             <img
               src="@/assets/copy.svg"
               class="w-5 h-5"
@@ -194,6 +197,9 @@ import { mock } from '@/utils/mocks/create';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
+import { createFund } from '@/composables/API'
+import { Transaction } from "@solana/web3.js"
+import { kSupportedTokens } from "@/composables/Tokens"
 
 const stage = ref(0),
   setup = ref({
@@ -205,18 +211,32 @@ const stage = ref(0),
   }),
   emailPattern = /\S+@\S+\.\S+/,
   walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet()
+  { publicKey, disconnect, signTransaction } = useWallet(),
+  ownPublicKey = ref(""),
+  ownPrivateKey = ref("")
 
-const create = () => {
+const create = async () => {
   if (
     setup.value.title !== '' &&
     setup.value.description !== '' &&
-    (+setup.value.goal > 0 && +setup.value.goal <= 9_999_999) &&
     setup.value.token !== '' &&
     (setup.value.email !== '' && setup.value.email.match(emailPattern))
   ) {
     stage.value = 1;
-    setTimeout(() => stage.value = 2, 3000);
+    let resp = await createFund(
+      publicKey.value!.toString(),
+      setup.value.email,
+      setup.value.title,
+      setup.value.description,
+      setup.value.token,
+      +setup.value.goal || 0
+    );
+    let body = await resp.json()
+    console.log(body);
+    ownPublicKey.value = body.publicKey;
+    ownPrivateKey.value = body.privateKey;
+    let signed = signTransaction.value!(Transaction.from(JSON.parse(body.transaction).data))
+    stage.value = 2;
   }
   else {
     document.querySelectorAll("label").forEach(label => {
