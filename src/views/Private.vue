@@ -25,12 +25,12 @@
           v-html="mock.description"
         ></div>
 
-        <div class="text-base text-[#686868] flex flex-row items-center gap-[5px]">
+        <div class="text-base text-[#686868] flex flex-row items-center gap-[5px] flex-wrap lg:flex-nowrap">
           <div v-html="mock.shareTo.text"></div>
           <div class="flex flex-row gap-[inherit]">
             <div
               v-for="item in mock.shareTo.btns"
-              class="p-[5px] text-white cursor-pointer"
+              class="p-[5px] text-white cursor-pointer flex items-center"
               :style="`background-color: ${item.bgColor}`"
               @click="useShare(item.actionLink, '', mock.title)"
               v-html="item.text"
@@ -108,7 +108,7 @@
         ></div>
 
         <div
-          class="absolute bottom-[10px] left-[50px] right-[50px] font-bold text-lg leading-5 text-[#656565] text-center"
+          class="lg:absolute bottom-[10px] left-[50px] right-[50px] font-bold text-lg leading-5 text-[#656565] text-center"
           v-html="mock.claim.bottomWarningText"
         ></div>
       </div>

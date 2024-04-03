@@ -9,7 +9,7 @@
         class="hidden lg:block absolute w-[200px] -top-[150px] left-[calc((100%_-_200px)_/_2)]"
       />
       <div
-        class="lg:bg-[#F3F4F6] lg:rounded-2xl lg:p-[50px] lg:w-1/2 lg:h-full flex flex-col gap-[30px] justify-center mb-5 lg:mb-0"
+        class="lg:bg-[#F3F4F6] lg:rounded-2xl lg:p-[50px] w-[inherit] lg:w-1/2 lg:h-full flex flex-col gap-[30px] justify-center mb-5 lg:mb-0"
         :class="{ 'items-center': stage !== 2 }"
       >
         <template v-if="stage !== 2">
@@ -30,12 +30,12 @@
             v-html="mock.share.description"
           ></div>
 
-          <div class="text-base text-[#686868] flex flex-row items-center gap-[5px]">
+          <div class="text-base text-[#686868] flex flex-row items-center gap-[5px] flex-wrap lg:flex-nowrap">
             <div v-html="mock.share.shareTo.text"></div>
             <div class="flex flex-row gap-[inherit]">
               <div
                 v-for="item in mock.share.shareTo.btns"
-                class="p-[5px] text-white cursor-pointer"
+                class="p-[5px] text-white cursor-pointer flex items-center"
                 :style="`background-color: ${item.bgColor}`"
                 @click="useShare(item.actionLink, ownPublicKey, setup.title)"
                 v-html="item.text"
@@ -146,7 +146,7 @@
           >Create a Piggy Box</div>
         </template>
         <template v-else-if="stage == 1">
-          <SpinnerDiamond class="self-center" />
+          <SpinnerDiamond class="self-center my-20 lg:my-0" />
         </template>
         <template v-else-if="stage == 2">
           <div class="font-bold text-2xl leading-none">{{ mock.privateZone.title }}</div>
