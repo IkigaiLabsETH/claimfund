@@ -198,7 +198,7 @@ import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
 import { createFund } from '@/composables/API'
-import { Transaction } from "@solana/web3.js"
+import { Connection, Transaction } from "@solana/web3.js"
 import { kSupportedTokens } from "@/composables/Tokens"
 
 const stage = ref(0),
@@ -211,7 +211,7 @@ const stage = ref(0),
   }),
   emailPattern = /\S+@\S+\.\S+/,
   walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect, signTransaction } = useWallet(),
+  { publicKey, sendTransaction } = useWallet(),
   ownPublicKey = ref(""),
   ownPrivateKey = ref("")
 
@@ -235,7 +235,15 @@ const create = async () => {
     console.log(body);
     ownPublicKey.value = body.publicKey;
     ownPrivateKey.value = body.privateKey;
-    let signed = signTransaction.value!(Transaction.from(JSON.parse(body.transaction).data))
+    // let signed = await signTransaction.value!(Transaction.from(JSON.parse(body.transaction).data))
+    // let signature = await sendTransaction(signed);
+
+    const connection = new Connection(import.meta.env.VITE_APP_SOLANA_RPC || "")
+    const transaction = Transaction.from(JSON.parse(body.transaction).data);
+    const signature = await sendTransaction(transaction, connection);
+    const res = await connection.confirmTransaction(signature, 'confirmed');
+    console.log('mike', 'res', res);
+
     stage.value = 2;
   }
   else {
