@@ -177,6 +177,7 @@ import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
 import { useRoute } from "vue-router";
 
+const route = useRoute();
 const amount = ref(0),
   field1 = ref(""),
   field2 = ref(""),
@@ -201,13 +202,42 @@ const applyAmount = () => {
 }
 
 const init = async () => {
-    const route = useRoute();
     console.log('mike', 'route.params', route.params);
     const boxPublicKey = '' + route.params.public_key;
     console.log('mike', 'boxPublicKey:',boxPublicKey);
     const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
     console.log('mike', 'assets:',assets);
+    if (!assets || assets.length == 0) {
+        //TODO: Herman, show error, instead of public page
+    }
+    else{
+        const asset = assets[0];
+        console.log('mike', 'asset:',asset);
+
+        let title = '';
+        let description = '';
+        let host = '';
+        let token = '';
+        let tokenAddress = '';
+        let goal = '';
+        let balance = '';
+        let withdrawn = '';
+
+        asset.attributes?.attributeList?.forEach((attribute) => {
+            if (attribute.key == 'title') { title = attribute.value; }
+            else if (attribute.key == 'description') { description = attribute.value; }
+            else if (attribute.key == 'host') { host = attribute.value; }
+            else if (attribute.key == 'token') { token = attribute.value; }
+            else if (attribute.key == 'tokenAddress') { tokenAddress = attribute.value; }
+            else if (attribute.key == 'goal') { goal = attribute.value; }
+        });
+
+        //TODO: get balance and withdrawn from blockchain
+
+        //TODO: Herman, please add the following to the mock data
+    }
 }
+init();
 </script>
 
 <style
