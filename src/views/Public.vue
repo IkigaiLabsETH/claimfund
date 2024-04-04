@@ -174,6 +174,8 @@ import { inject, nextTick, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
+import { MetaplexManager } from '@/managers/MetaplexManager';
+import { useRoute } from "vue-router";
 
 const amount = ref(0),
   field1 = ref(""),
@@ -196,6 +198,15 @@ watch(amount, () => {
 const applyAmount = () => {
   console.log(amountInput.value.value > 9_999_999)
   if (amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
+}
+
+const init = async () => {
+    const route = useRoute();
+    console.log('mike', 'route.params', route.params);
+    const boxPublicKey = '' + route.params.public_key;
+    console.log('mike', 'boxPublicKey:',boxPublicKey);
+    const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+    console.log('mike', 'assets:',assets);
 }
 </script>
 
