@@ -175,6 +175,7 @@ import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
+import { SolanaManager } from '@/managers/SolanaManager';
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -202,13 +203,10 @@ const applyAmount = () => {
 }
 
 const init = async () => {
-    console.log('mike', 'route.params', route.params);
     const boxPublicKey = '' + route.params.public_key;
-    console.log('mike', 'boxPublicKey:',boxPublicKey);
     const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
-    console.log('mike', 'assets:',assets);
     if (!assets || assets.length == 0) {
-        //TODO: Herman, show error, instead of public page
+        //TODO: Herman, show error page, instead of public page
     }
     else{
         const asset = assets[0];
@@ -220,9 +218,9 @@ const init = async () => {
         let token = '';
         let tokenAddress = '';
         let goal = '';
-        let balance = '';
-        let withdrawn = '';
-
+        let balance = 0;
+        let withdrawn = 0;
+        
         asset.attributes?.attributeList?.forEach((attribute) => {
             if (attribute.key == 'title') { title = attribute.value; }
             else if (attribute.key == 'description') { description = attribute.value; }
@@ -232,9 +230,21 @@ const init = async () => {
             else if (attribute.key == 'goal') { goal = attribute.value; }
         });
 
-        //TODO: get balance and withdrawn from blockchain
+        // get balance from blockchain
+        balance = (await SolanaManager.getWalletBalance(boxPublicKey, tokenAddress)).uiAmount;
+        withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, tokenAddress)).uiAmount;
+        
+        console.log('mike', 'title:', title);
+        console.log('mike', 'description:', description);
+        console.log('mike', 'host:', host);
+        console.log('mike', 'token:', token);
+        console.log('mike', 'tokenAddress:', tokenAddress);
+        console.log('mike', 'goal:', goal);
+        console.log('mike', 'balance:', balance);
+        console.log('mike', 'withdrawn:', withdrawn);
 
-        //TODO: Herman, please add the following to the mock data
+        //TODO: Herman, please add the following to the mock data: 
+        // title, description, host, token, goal, balance, withdrawn
     }
 }
 init();
