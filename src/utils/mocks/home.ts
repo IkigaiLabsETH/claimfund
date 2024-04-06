@@ -1,3 +1,5 @@
+import type { Router } from "vue-router"
+
 class Home {
   constructor(
     public title: string,
@@ -28,8 +30,8 @@ export const mock = new Home(
     buttons: [
       {
         text: "Start fundraising",
-        action: function () {
-          console.log(this.text);
+        action: function (router: Router) {
+          router.push({name: 'create'})
         }
       }
     ]

@@ -2,22 +2,74 @@ export interface Token {
   mintAddress: string;
   decimals: number;
   name: string;
+  addValueButtons: Array<{ amount: number, usd: number, title: string }>
 }
 
-export const kSupportedTokens: Token[] = [
+export const kSupportedTokens: Array<Token> = [
   {
     mintAddress: 'SOL',
     decimals: 9,
     name: 'SOL',
+    addValueButtons: [
+      {
+        amount: 5,
+        usd: 5,
+        title: "+5 USDC"
+      },
+      {
+        amount: 25,
+        usd: 25,
+        title: "+25 USDC"
+      },
+      {
+        amount: 50,
+        usd: 50,
+        title: "+50 USDC"
+      }
+    ]
   },
   {
     mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     decimals: 6,
     name: 'USDC',
+    addValueButtons: [
+      {
+        amount: 5,
+        usd: 5,
+        title: "+5 USDC"
+      },
+      {
+        amount: 25,
+        usd: 25,
+        title: "+25 USDC"
+      },
+      {
+        amount: 50,
+        usd: 50,
+        title: "+50 USDC"
+      }
+    ]
   },
   {
     mintAddress: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     decimals: 5,
     name: 'BONK',
+    addValueButtons: [
+      {
+        amount: 5,
+        usd: 5,
+        title: "+5 USDC"
+      },
+      {
+        amount: 25,
+        usd: 25,
+        title: "+25 USDC"
+      },
+      {
+        amount: 50,
+        usd: 50,
+        title: "+50 USDC"
+      }
+    ]
   },
 ];

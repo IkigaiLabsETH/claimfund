@@ -1,3 +1,5 @@
+import type { Router } from "vue-router"
+
 class Error {
   constructor(
     public title: string,
@@ -24,8 +26,8 @@ export const mock = new Error(
     buttons: [
       {
         text: "Start fundraising",
-        action: function () {
-          console.log(this.text);
+        action: function (router: Router) {
+          router.push({name: 'create'})
         }
       }
     ]

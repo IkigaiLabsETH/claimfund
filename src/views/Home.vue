@@ -29,6 +29,7 @@
         <div
           class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-[350px] cursor-pointer"
           v-html="mock.btnText"
+          @click="$router.push({name: 'create'})"
         ></div>
       </div>
 
@@ -41,7 +42,7 @@
         <div
           v-for="btn in mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.buttons"
           v-html="btn.text"
-          @click="btn.action()"
+          @click="btn.action($router)"
           class="text-xs leading-none py-[6px] px-[10px] text-white bg-[#FFFFFF4D] border border-white rounded-[5px] cursor-pointer"
         ></div>
       </div>
