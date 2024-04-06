@@ -9,8 +9,7 @@
         class="lg:absolute w-[100px] lg:w-[200px] lg:-top-[150px] lg:left-[calc((100%_-_200px)_/_2)]"
       />
       <div
-        class="lg:rounded-2xl h-auto m-auto lg:py-[120px] lg:px-[140px] w-full flex flex-col gap-[50px] items-center"
-      >
+        class="lg:rounded-2xl h-auto m-auto lg:py-[120px] lg:px-[140px] w-full flex flex-col gap-[50px] items-center">
         <div
           class="font-bold text-base lg:text-[40px] leading-5 lg:leading-none text-center"
           v-html="mock.title"
@@ -22,7 +21,7 @@
         <RouterLink
           class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-[350px] cursor-pointer no-underline"
           v-html="mock.btnText"
-          to="home"
+          :to="{name: 'home'}"
         ></RouterLink>
       </div>
 

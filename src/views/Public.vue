@@ -18,11 +18,11 @@
         />
         <div
           class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center"
-          v-html="mock.title"
+          v-html="dynamicData.title || mock.title"
         ></div>
         <div
           class="text-base leading-5 text-[#656565] text-center lg:mt-2 lg:text-lg lg:leading-5"
-          v-html="mock.description"
+          v-html="dynamicData.description || mock.description"
         ></div>
 
         <div class="flex flex-row gap-[10px] w-full lg:mt-auto">
@@ -31,7 +31,7 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Host</div>
-              <div v-html="mock.stats.host"></div>
+              <div v-html="dynamicData.host || mock.stats.host"></div>
             </div>
           </div>
 
@@ -40,15 +40,15 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Balance</div>
-              <div v-html="`${useFormatter(mock.stats.balance)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.balance || mock.stats.balance)} ${dynamicData.token || mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Withdraw</div>
-              <div v-html="`${useFormatter(mock.stats.withdrawn)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.withdrawn || mock.stats.withdrawn)} ${dynamicData.token || mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Goal</div>
-              <div v-html="`${useFormatter(mock.stats.goal)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(+dynamicData.goal || mock.stats.goal)} ${dynamicData.token || mock.stats.currency}`"></div>
             </div>
           </div>
         </div>
@@ -170,21 +170,33 @@
 >
 import { useFormatter } from '@/composables/currencyFormatter';
 import { mock } from '@/utils/mocks/public';
-import { inject, nextTick, ref, watch } from 'vue';
+import { inject, nextTick, reactive, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
 import { SolanaManager } from '@/managers/SolanaManager';
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
-const route = useRoute();
+const route = useRoute(),
+  router = useRouter();
+
 const amount = ref(0),
   field1 = ref(""),
   field2 = ref(""),
   amountInput = ref(),
   walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet()
+  { publicKey, disconnect } = useWallet(),
+  dynamicData = ref({
+    title: '',
+    description: '',
+    host: '',
+    token: '',
+    tokenAddress: '',
+    goal: '',
+    balance: 0,
+    withdrawn: 0,
+  })
 
 watch(amountInput, () => {
   amountInput.value.innerText = '0';
@@ -203,49 +215,40 @@ const applyAmount = () => {
 }
 
 const init = async () => {
-    const boxPublicKey = '' + route.params.public_key;
-    const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
-    if (!assets || assets.length == 0) {
-        //TODO: Herman, show error page, instead of public page
-    }
-    else{
-        const asset = assets[0];
-        console.log('mike', 'asset:',asset);
+  const boxPublicKey = '' + route.params.public_key;
+  const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+  if (!assets || assets.length == 0) {
+    router.push('error');
+  }
+  else {
+    const asset = assets[0];
+    console.log('mike', 'asset:', asset);
 
-        let title = '';
-        let description = '';
-        let host = '';
-        let token = '';
-        let tokenAddress = '';
-        let goal = '';
-        let balance = 0;
-        let withdrawn = 0;
-        
-        asset.attributes?.attributeList?.forEach((attribute) => {
-            if (attribute.key == 'title') { title = attribute.value; }
-            else if (attribute.key == 'description') { description = attribute.value; }
-            else if (attribute.key == 'host') { host = attribute.value; }
-            else if (attribute.key == 'token') { token = attribute.value; }
-            else if (attribute.key == 'tokenAddress') { tokenAddress = attribute.value; }
-            else if (attribute.key == 'goal') { goal = attribute.value; }
-        });
+    asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
+      if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
+      else if (attribute.key == 'description') { dynamicData.value.description = attribute.value; }
+      else if (attribute.key == 'host') { dynamicData.value.host = attribute.value; }
+      else if (attribute.key == 'token') { dynamicData.value.token = attribute.value; }
+      else if (attribute.key == 'tokenAddress') { dynamicData.value.tokenAddress = attribute.value; }
+      else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
+    });
 
-        // get balance from blockchain
-        balance = (await SolanaManager.getWalletBalance(boxPublicKey, tokenAddress)).uiAmount;
-        withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, tokenAddress)).uiAmount;
-        
-        console.log('mike', 'title:', title);
-        console.log('mike', 'description:', description);
-        console.log('mike', 'host:', host);
-        console.log('mike', 'token:', token);
-        console.log('mike', 'tokenAddress:', tokenAddress);
-        console.log('mike', 'goal:', goal);
-        console.log('mike', 'balance:', balance);
-        console.log('mike', 'withdrawn:', withdrawn);
+    // get balance from blockchain
+    dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress)).uiAmount;
+    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress)).uiAmount;
 
-        //TODO: Herman, please add the following to the mock data: 
-        // title, description, host, token, goal, balance, withdrawn
-    }
+    console.log('mike', 'title:', dynamicData.value.title);
+    console.log('mike', 'description:', dynamicData.value.description);
+    console.log('mike', 'host:', dynamicData.value.host);
+    console.log('mike', 'token:', dynamicData.value.token);
+    console.log('mike', 'tokenAddress:', dynamicData.value.tokenAddress);
+    console.log('mike', 'goal:', dynamicData.value.goal);
+    console.log('mike', 'balance:', dynamicData.value.balance);
+    console.log('mike', 'withdrawn:', dynamicData.value.withdrawn);
+
+    //TODO: Herman, please add the following to the mock data: 
+    // title, description, host, token, goal, balance, withdrawn
+  }
 }
 init();
 </script>

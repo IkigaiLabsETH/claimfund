@@ -12,8 +12,8 @@ const router = createRouter({
   routes: [
     {
       path: '',
-      name: 'index',
-      component: Index
+      name: 'home',
+      component: Home
     },
     {
       path: '/public/:public_key',
@@ -29,11 +29,6 @@ const router = createRouter({
       path: '/private/:private_key',
       name: 'private',
       component: Private
-    },
-    {
-      path: '/home',
-      name: 'home',
-      component: Home
     },
     {
       path: '/:pathMatch(.*)*',
