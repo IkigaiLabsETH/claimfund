@@ -176,6 +176,7 @@ import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
 import { SolanaManager } from '@/managers/SolanaManager';
+import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute(),
@@ -210,8 +211,8 @@ watch(amount, () => {
 })
 
 const applyAmount = () => {
-  console.log(amountInput.value.value > 9_999_999)
-  if (amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
+  console.log(amountInput.value.value > 9_999_999_999)
+  if (amountInput.value.value > 9_999_999_999) return amountInput.value.value = 9_999_999_999;
 }
 
 const init = async () => {
@@ -227,7 +228,7 @@ const init = async () => {
     asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
       if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
       else if (attribute.key == 'description') { dynamicData.value.description = attribute.value; }
-      else if (attribute.key == 'host') { dynamicData.value.host = attribute.value; }
+      else if (attribute.key == 'host') { dynamicData.value.host = Helpers.truncateString(attribute.value, 8); }
       else if (attribute.key == 'token') { dynamicData.value.token = attribute.value; }
       else if (attribute.key == 'tokenAddress') { dynamicData.value.tokenAddress = attribute.value; }
       else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
