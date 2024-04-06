@@ -3,6 +3,8 @@ import Index from '@/views/Index.vue'
 import Public from '@/views/Public.vue'
 import Create from '@/views/Create.vue'
 import Private from '@/views/Private.vue'
+import Home from '@/views/Home.vue'
+import Error from '@/views/Error.vue'
 
 const router = createRouter({
   // @ts-ignore compilerOptions/module is 'NodeNext' but still it does not recognize it (though no errors in running)
@@ -14,7 +16,7 @@ const router = createRouter({
       component: Index
     },
     {
-      path: '/box/:public_key',
+      path: '/public/:public_key',
       name: 'public',
       component: Public
     },
@@ -24,9 +26,19 @@ const router = createRouter({
       component: Create
     },
     {
-      path: '/manage/:private_key',
+      path: '/private/:private_key',
       name: 'private',
       component: Private
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: Home
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'error',
+      component: Error
     }
   ]
 })

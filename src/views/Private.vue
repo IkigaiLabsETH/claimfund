@@ -17,7 +17,7 @@
           class="lg:mt-[13px] w-[100px] rounded-[10px]"
         />
         <div
-          class="font-bold text-[10px] lg:text-2xl leading-[34px]] text-center"
+          class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center"
           v-html="mock.title"
         ></div>
         <div
