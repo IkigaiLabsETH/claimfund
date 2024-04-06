@@ -174,7 +174,11 @@ import { inject, nextTick, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
+import { MetaplexManager } from '@/managers/MetaplexManager';
+import { SolanaManager } from '@/managers/SolanaManager';
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const amount = ref(0),
   field1 = ref(""),
   field2 = ref(""),
@@ -197,6 +201,53 @@ const applyAmount = () => {
   console.log(amountInput.value.value > 9_999_999)
   if (amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
 }
+
+const init = async () => {
+    const boxPublicKey = '' + route.params.public_key;
+    const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+    if (!assets || assets.length == 0) {
+        //TODO: Herman, show error page, instead of public page
+    }
+    else{
+        const asset = assets[0];
+        console.log('mike', 'asset:',asset);
+
+        let title = '';
+        let description = '';
+        let host = '';
+        let token = '';
+        let tokenAddress = '';
+        let goal = '';
+        let balance = 0;
+        let withdrawn = 0;
+        
+        asset.attributes?.attributeList?.forEach((attribute) => {
+            if (attribute.key == 'title') { title = attribute.value; }
+            else if (attribute.key == 'description') { description = attribute.value; }
+            else if (attribute.key == 'host') { host = attribute.value; }
+            else if (attribute.key == 'token') { token = attribute.value; }
+            else if (attribute.key == 'tokenAddress') { tokenAddress = attribute.value; }
+            else if (attribute.key == 'goal') { goal = attribute.value; }
+        });
+
+        // get balance from blockchain
+        balance = (await SolanaManager.getWalletBalance(boxPublicKey, tokenAddress)).uiAmount;
+        withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, tokenAddress)).uiAmount;
+        
+        console.log('mike', 'title:', title);
+        console.log('mike', 'description:', description);
+        console.log('mike', 'host:', host);
+        console.log('mike', 'token:', token);
+        console.log('mike', 'tokenAddress:', tokenAddress);
+        console.log('mike', 'goal:', goal);
+        console.log('mike', 'balance:', balance);
+        console.log('mike', 'withdrawn:', withdrawn);
+
+        //TODO: Herman, please add the following to the mock data: 
+        // title, description, host, token, goal, balance, withdrawn
+    }
+}
+init();
 </script>
 
 <style
