@@ -139,6 +139,7 @@ import { MetaplexManager } from '@/managers/MetaplexManager';
 import { useRoute, useRouter } from "vue-router";
 import { SolanaManager } from '@/managers/SolanaManager';
 import { TipLink } from '@tiplink/api';
+import { Helpers } from '@/managers/Helpers';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect } = useWallet()
@@ -149,12 +150,14 @@ const route = useRoute(),
 
 const claim = () => {
   alert('claim');
+  
 }
 
 const init = async () => {
   const tiplinkHash = '' + route.params.private_key;
   const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
-  
+  const keypair = tiplink.keypair;
+  const boxPublicKey = keypair.publicKey.toBase58();
 
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
   if (!assets || assets.length == 0) {
