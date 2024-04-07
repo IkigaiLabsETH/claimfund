@@ -115,17 +115,18 @@ export const mock = new Index(
         action: function (router: Router) {
           router.push({name: 'create'})
         }
-      }, {
-        text: "Streaming widget",
-        action: function () {
-          console.log(this.text);
-        }
-      }, {
-        text: "Run a raffle",
-        action: function () {
-          console.log(this.text);
-        }
       }
+    //   , {
+    //     text: "Streaming widget",
+    //     action: function () {
+    //       console.log(this.text);
+    //     }
+    //   }, {
+    //     text: "Run a raffle",
+    //     action: function () {
+    //       console.log(this.text);
+    //     }
+    //   }
     ]
   }
 )

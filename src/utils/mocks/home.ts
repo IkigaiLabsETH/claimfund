@@ -21,7 +21,7 @@ class Home {
 export const mock = new Home(
   "The Future Of Donations",
   "image1.png",
-  "Decentralized micropayment tool built on the Solana Blockchain that helps collect donations or fundraising.",
+  "Decentralized micropayment tool built on the Solana Blockchain that helps collect donations.",
   "Funded with an instagrant by",
   "funded.svg",
   "Start fundraising",
