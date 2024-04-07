@@ -70,7 +70,6 @@ export class SolanaManager {
 
         const fromPublicKey = new web3.PublicKey(fromWalletAddress);
         const toPublicKey = new web3.PublicKey(toWalletAddress);
-        const tokenPublicKey = new web3.PublicKey(tokenAddress);
         const token = kSupportedTokens.find((token) => token.mintAddress == tokenAddress);
         if (!token) { return undefined; }
 
@@ -87,6 +86,7 @@ export class SolanaManager {
             );
         }
         else {
+            const tokenPublicKey = new web3.PublicKey(tokenAddress);
             const instr = await this.createSplTransferInstructions(web3Conn, tokenPublicKey, amount, token.decimals, fromPublicKey, toPublicKey, fromPublicKey)
             if (instr){
                 instructions.push(...instr);
