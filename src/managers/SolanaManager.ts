@@ -116,6 +116,42 @@ export class SolanaManager {
         return transaction;
     }
 
+    static async claimDonations(fromWalletAddress: string, toWalletAddress: string, tokenAddress: string, amount: number): Promise<web3.Transaction | undefined> {
+        console.log('claimDonations', fromWalletAddress, toWalletAddress, tokenAddress, amount);
+
+        const web3Conn = this.newConnection();
+        const blockhash = (await web3Conn.getLatestBlockhash()).blockhash;
+        const transaction = await this.createTransaction(new web3.PublicKey(toWalletAddress), blockhash);
+
+        const fromPublicKey = new web3.PublicKey(fromWalletAddress);
+        const toPublicKey = new web3.PublicKey(toWalletAddress);
+        const token = kSupportedTokens.find((token) => token.mintAddress == tokenAddress);
+        if (!token) { return undefined; }
+
+        const instructions: web3.TransactionInstruction[] = [];
+
+        const amountInLamports = Math.round(amount * (10 ** token.decimals));
+        if (tokenAddress == 'sol' || tokenAddress == 'SOL'){
+            instructions.push(
+                web3.SystemProgram.transfer({
+                    fromPubkey: fromPublicKey,
+                    toPubkey: toPublicKey,
+                    lamports: amountInLamports
+                })
+            );
+        }
+        else {
+            const tokenPublicKey = new web3.PublicKey(tokenAddress);
+            const instr = await this.createSplTransferInstructions(web3Conn, tokenPublicKey, amount, token.decimals, fromPublicKey, toPublicKey, toPublicKey)
+            if (instr){
+                instructions.push(...instr);
+            }
+        }
+
+        transaction.add(...instructions);
+        return transaction;
+    }
+
     static async createSplTransferInstructions(web3Conn: web3.Connection, splTokenMintPublicKey: web3.PublicKey, amount: number, decimals: number, fromPublicKey: web3.PublicKey, toPublicKey: web3.PublicKey, feePayerPublicKey: web3.PublicKey): Promise<web3.TransactionInstruction[] | undefined>{
         try {
             const fromTokenAddress = await spl.getAssociatedTokenAddress(splTokenMintPublicKey, fromPublicKey);
