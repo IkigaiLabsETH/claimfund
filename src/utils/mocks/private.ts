@@ -84,7 +84,7 @@ export const mock = new Private(
     bottomWarningText: "This is your private vault page.<br/>Don’t share the link with anyone.<br/>If you share the link - that person will be able to claim all raised funds."
   },
   {
-    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='' target='blank_'>Privacy Policy</a> and <a href='' target='blank_'>Terms of Use</a>.",
+    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='https://docs.claim.fund/privacy-policy' target='blank_'>Privacy Policy</a> and <a href='https://docs.claim.fund/terms-of-use' target='blank_'>Terms of Use</a>.",
     buttons: [{
       text: "Start fundraising",
       action: function (router: Router) {

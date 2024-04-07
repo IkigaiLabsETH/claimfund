@@ -22,7 +22,7 @@ export const mock = new Error(
   "There is no such page on Claim Fund.<br/>Go to Home page to find a fundraise or start yours.",
   "Home page",
   {
-    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='' target='blank_'>Privacy Policy</a> and <a href='' target='blank_'>Terms of Use</a>.",
+    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='https://docs.claim.fund/privacy-policy' target='blank_'>Privacy Policy</a> and <a href='https://docs.claim.fund/terms-of-use' target='blank_'>Terms of Use</a>.",
     buttons: [
       {
         text: "Start fundraising",
