@@ -100,7 +100,7 @@
               class="p-[5px] lg:px-[20px] lg:py-[10px] rounded-[10px] lg:rounded-[20px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs lg:text-sm leading-none lg:leading-5 cursor-pointer"
               v-for="option in kSupportedTokens.find(el => el.name == dynamicData.token)?.addValueButtons ?? mock.contribution.options"
               :key="option.title"
-              @click="amount = Math.round((amount + option.amount) * 1000000)/1000000"
+              @click="amount = Math.round((amount + option.amount) * 1000000) / 1000000"
             >
               <div
                 class="font-bold"
@@ -248,39 +248,39 @@ const applyAmount = () => {
 }
 
 const makeDonation = async () => {
-    console.log('mike', 'makeDonation', amountInput.value.value);
-    const boxPublicKey = '' + route.params.public_key;
+  console.log('mike', 'makeDonation', amountInput.value.value);
+  const boxPublicKey = '' + route.params.public_key;
 
-    if (!publicKey?.value){
-        showToast('Wallet is not connected', 'error');
-        return;
-    }
+  if (!publicKey?.value) {
+    showToast('Wallet is not connected', 'error');
+    return;
+  }
 
-    const transaction = await SolanaManager.makeDonation(
-      publicKey.value.toBase58(),
-      boxPublicKey,
-      dynamicData.value.tokenAddress || '',
-      amountInput.value.value,
-      field1.value,
-      field2.value,
-    );
-    if (transaction){
-        const connection = SolanaManager.newConnection();
-        const signature = await sendTransaction(transaction, connection);
-        const res = await connection.confirmTransaction(signature, 'confirmed');
-        console.log('mike', 'signature', signature, 'res', res);
-        showToast('Success', 'success');
-    }
-    else {
-        showToast('Transaction was not created. Try again.', 'error');
-    }
+  const transaction = await SolanaManager.makeDonation(
+    publicKey.value.toBase58(),
+    boxPublicKey,
+    dynamicData.value.tokenAddress || '',
+    amountInput.value.value,
+    field1.value,
+    field2.value,
+  );
+  if (transaction) {
+    const connection = SolanaManager.newConnection();
+    const signature = await sendTransaction(transaction, connection);
+    const res = await connection.confirmTransaction(signature, 'confirmed');
+    console.log('mike', 'signature', signature, 'res', res);
+    showToast('Success', 'success');
+  }
+  else {
+    showToast('Transaction was not created. Try again.', 'error');
+  }
 }
 
 const init = async () => {
   const boxPublicKey = '' + route.params.public_key;
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
   if (!assets || assets.length == 0) {
-    router.push('error');
+    router.push({ name: 'error' });
   }
   else {
     const asset = assets[0];
