@@ -147,7 +147,10 @@
 
         <div class="w-full h-[1px] bg-[#D7D7D7] shrink-0"></div>
 
-        <div class="flex flex-row gap-[10px] justify-center items-center cursor-pointer">
+        <div
+          class="flex flex-row gap-[10px] justify-center items-center cursor-pointer"
+          @click="contributionsPopupOpened = true"
+        >
           <img src="@/assets/contribution.svg" />
           <div
             class="text-sm font-bold leading-5 text-[#8F8F8F]"
@@ -172,6 +175,11 @@
         ></div>
       </div>
     </main>
+
+    <ContributionsPopup
+      :isModalOpened="contributionsPopupOpened"
+      @close="contributionsPopupOpened = false"
+    />
   </div>
 </template>
 
@@ -187,11 +195,13 @@ import { MetaplexManager } from '@/managers/MetaplexManager';
 import { SolanaManager } from '@/managers/SolanaManager';
 import { useRoute, useRouter } from "vue-router";
 import { kSupportedTokens } from '@/composables/Tokens';
+import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const route = useRoute(),
   router = useRouter();
 
 const amount = ref(0),
+  contributionsPopupOpened = ref(false),
   field1 = ref(""),
   field2 = ref(""),
   amountInput = ref(),

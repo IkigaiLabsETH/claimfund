@@ -86,7 +86,10 @@
           </div>
         </div>
 
-        <div class="flex flex-row gap-[10px] justify-center items-center cursor-pointer">
+        <div
+          class="flex flex-row gap-[10px] justify-center items-center cursor-pointer"
+          @click="contributionsPopupOpened = true"
+        >
           <img src="@/assets/contribution.svg" />
           <div
             class="text-sm font-bold leading-5 text-[#8F8F8F]"
@@ -122,32 +125,33 @@
         ></div>
       </div>
     </main>
+
+    <ContributionsPopup
+      :isModalOpened="contributionsPopupOpened"
+      @close="contributionsPopupOpened = false"
+    />
   </div>
 </template>
 
-<script
-  setup
-  lang="ts"
->
+<script setup lang="ts">
 import { useFormatter } from '@/composables/currencyFormatter';
 import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/private';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
+import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet()
+  { publicKey, disconnect } = useWallet(),
+  contributionsPopupOpened = ref(false)
 
 const claim = () => {
   alert('claim');
 }
 </script>
 
-<style
-  lang="scss"
-  scoped
->
+<style lang="scss" scoped>
 .gradient-block {
   border: 3px solid transparent;
   background: linear-gradient(0deg, #fff, #fff) padding-box,
