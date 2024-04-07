@@ -179,18 +179,16 @@
         <div
           v-for="btn in mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.buttons"
           v-html="btn.text"
-          @click="btn.action()"
+          @click="btn.action($router)"
           class="text-xs leading-none py-[6px] px-[10px] text-white bg-[#FFFFFF4D] border border-white rounded-[5px] cursor-pointer"
-        ></div>
+        >
+        </div>
       </div>
     </main>
   </div>
 </template>
 
-<script
-  setup
-  lang="ts"
->
+<script setup lang="ts">
 import SpinnerDiamond from '@/components/SpinnerDiamond.vue';
 import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/create';
@@ -238,13 +236,18 @@ const create = async () => {
     // let signed = await signTransaction.value!(Transaction.from(JSON.parse(body.transaction).data))
     // let signature = await sendTransaction(signed);
 
-    const connection = new Connection(import.meta.env.VITE_APP_SOLANA_RPC || "")
-    const transaction = Transaction.from(JSON.parse(body.transaction).data);
-    const signature = await sendTransaction(transaction, connection);
-    const res = await connection.confirmTransaction(signature, 'confirmed');
-    console.log('mike', 'res', res);
+    try {
+      const connection = new Connection(import.meta.env.VITE_APP_SOLANA_RPC || "")
+      const transaction = Transaction.from(JSON.parse(body.transaction).data);
+      const signature = await sendTransaction(transaction, connection);
+      const res = await connection.confirmTransaction(signature, 'confirmed');
+      console.log('mike', 'res', res);
 
-    stage.value = 2;
+      stage.value = 2;
+    } catch (err) {
+      console.error(err);
+      stage.value = 0;
+    }
   }
   else {
     document.querySelectorAll("label").forEach(label => {

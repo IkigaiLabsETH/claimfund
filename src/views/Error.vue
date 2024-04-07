@@ -34,7 +34,7 @@
         <div
           v-for="btn in mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.buttons"
           v-html="btn.text"
-          @click="btn.action()"
+          @click="btn.action($router)"
           class="text-xs leading-none py-[6px] px-[10px] text-white bg-[#FFFFFF4D] border border-white rounded-[5px] cursor-pointer"
         ></div>
       </div>

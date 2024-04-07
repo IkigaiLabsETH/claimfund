@@ -11,19 +11,27 @@
       <div
         class="lg:bg-[#F3F4F6] lg:rounded-2xl lg:p-5 lg:w-1/2 lg:h-full flex flex-col gap-[30px] items-center mb-5 lg:mb-0"
       >
-        <img
-          v-if="mock.image2"
-          :src="'/' + mock.image2"
-          class="lg:mt-[52px] w-[100px] rounded-[10px]"
-        />
         <div
-          class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center"
-          v-html="dynamicData.title || mock.title"
+          class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center mt-16"
+          v-html="dynamicData.title ?? mock.title"
         ></div>
         <div
           class="text-base leading-5 text-[#656565] text-center lg:mt-2 lg:text-lg lg:leading-5"
-          v-html="dynamicData.description || mock.description"
+          v-html="dynamicData.description ?? mock.description"
         ></div>
+
+        <div class="text-base text-[#686868] flex flex-row items-center gap-[5px] flex-wrap lg:flex-nowrap">
+          <div v-html="mock.shareTo.text"></div>
+          <div class="flex flex-row gap-[inherit]">
+            <div
+              v-for="item in mock.shareTo.btns"
+              class="p-[5px] text-white cursor-pointer flex items-center"
+              :style="`background-color: ${item.bgColor}`"
+              @click="useShare(item.actionLink, $route.params.public_key, dynamicData.title ?? mock.title)"
+              v-html="item.text"
+            ></div>
+          </div>
+        </div>
 
         <div class="flex flex-row gap-[10px] w-full lg:mt-auto">
           <div
@@ -31,7 +39,7 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Host</div>
-              <div v-html="dynamicData.host || mock.stats.host"></div>
+              <div v-html="formatWallet(dynamicData.host ?? mock.stats.host)"></div>
             </div>
           </div>
 
@@ -40,15 +48,21 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Balance</div>
-              <div v-html="`${useFormatter(dynamicData.balance || mock.stats.balance)} ${dynamicData.token || mock.stats.currency}`"></div>
+              <div
+                v-html="`${useFormatter(dynamicData.balance ?? mock.stats.balance)} ${dynamicData.token ?? mock.stats.currency}`"
+              ></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Withdraw</div>
-              <div v-html="`${useFormatter(dynamicData.withdrawn || mock.stats.withdrawn)} ${dynamicData.token || mock.stats.currency}`"></div>
+              <div
+                v-html="`${useFormatter(dynamicData.withdrawn ?? mock.stats.withdrawn)} ${dynamicData.token ?? mock.stats.currency}`"
+              ></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Goal</div>
-              <div v-html="`${useFormatter(+dynamicData.goal || mock.stats.goal)} ${dynamicData.token || mock.stats.currency}`"></div>
+              <div
+                v-html="`${useFormatter(+dynamicData.goal! ?? mock.stats.goal)} ${dynamicData.token ?? mock.stats.currency}`"
+              ></div>
             </div>
           </div>
         </div>
@@ -74,7 +88,7 @@
                 max="9999999"
                 class="w-[41px] h-[50px]"
               />
-              <div v-html="mock.stats.currency"></div>
+              <div v-html="dynamicData.token ?? mock.stats.currency"></div>
             </label>
             <div
               class="text-xs lg:text-base leading-none"
@@ -84,18 +98,15 @@
           <div class="flex flex-row gap-[10px] justify-center items-center">
             <div
               class="p-[5px] lg:px-[20px] lg:py-[10px] rounded-[10px] lg:rounded-[20px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs lg:text-sm leading-none lg:leading-5 cursor-pointer"
-              v-for="option in mock.contribution.options"
-              :key="option.id"
-              @click="amount += option.action()"
+              v-for="option in kSupportedTokens.find(el => el.name == dynamicData.token)?.addValueButtons ?? mock.contribution.options"
+              :key="option.title"
+              @click="amount += option.amount"
             >
               <div
                 class="font-bold"
                 v-html="option.title"
               ></div>
-              <div
-                class="text-[#8F8F8F]"
-                v-html="option.description"
-              ></div>
+              <div class="text-[#8F8F8F]">{{ option.usd }}$</div>
             </div>
           </div>
         </div>
@@ -156,7 +167,7 @@
         <div
           v-for="btn in mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.buttons"
           v-html="btn.text"
-          @click="btn.action()"
+          @click="btn.action($router)"
           class="text-xs leading-none py-[6px] px-[10px] text-white bg-[#FFFFFF4D] border border-white rounded-[5px] cursor-pointer"
         ></div>
       </div>
@@ -164,13 +175,11 @@
   </div>
 </template>
 
-<script
-  setup
-  lang="ts"
->
+<script setup lang="ts">
 import { useFormatter } from '@/composables/currencyFormatter';
+import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/public';
-import { inject, nextTick, reactive, ref, watch } from 'vue';
+import { inject, nextTick, reactive, ref, watch, type Ref } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
@@ -178,6 +187,7 @@ import { MetaplexManager } from '@/managers/MetaplexManager';
 import { SolanaManager } from '@/managers/SolanaManager';
 import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
+import { kSupportedTokens } from '@/composables/Tokens';
 
 const route = useRoute(),
   router = useRouter();
@@ -188,15 +198,24 @@ const amount = ref(0),
   amountInput = ref(),
   walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect, sendTransaction } = useWallet(),
-  dynamicData = ref({
-    title: '',
-    description: '',
-    host: '',
-    token: '',
-    tokenAddress: '',
-    goal: '',
-    balance: 0,
-    withdrawn: 0,
+  dynamicData: Ref<{
+    title: null | string,
+    description: null | string,
+    host: null | string,
+    token: null | string,
+    tokenAddress: null | string,
+    goal: null | string,
+    balance: null | number,
+    withdrawn: null | number
+  }> = ref({
+    title: null,
+    description: null,
+    host: null,
+    token: null,
+    tokenAddress: null,
+    goal: null,
+    balance: null,
+    withdrawn: null,
   })
 
 watch(amountInput, () => {
@@ -261,8 +280,8 @@ const init = async () => {
     });
 
     // get balance from blockchain
-    dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress)).uiAmount;
-    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress)).uiAmount;
+    dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
 
     console.log('mike', 'title:', dynamicData.value.title);
     console.log('mike', 'description:', dynamicData.value.description);
@@ -277,10 +296,7 @@ const init = async () => {
 init();
 </script>
 
-<style
-  lang="scss"
-  scoped
->
+<style lang="scss" scoped>
 .gradient-block {
   border: 3px solid transparent;
   background: linear-gradient(0deg, #fff, #fff) padding-box,

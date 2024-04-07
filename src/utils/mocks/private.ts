@@ -1,3 +1,5 @@
+import type { Router } from "vue-router"
+
 class Private {
   constructor(
     public title: string,
@@ -85,8 +87,8 @@ export const mock = new Private(
     text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='' target='blank_'>Privacy Policy</a> and <a href='' target='blank_'>Terms of Use</a>.",
     buttons: [{
       text: "Start fundraising",
-      action: function () {
-        console.log(this.text);
+      action: function (router: Router) {
+        router.push({name: 'create'})
       }
     }]
   }

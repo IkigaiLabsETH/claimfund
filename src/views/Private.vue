@@ -11,13 +11,8 @@
       <div
         class="lg:bg-[#F3F4F6] lg:rounded-2xl lg:px-[50px] lg:py-5 lg:w-1/2 lg:h-full flex flex-col gap-[30px] items-center mb-5 lg:mb-0"
       >
-        <img
-          v-if="mock.image2"
-          :src="'/' + mock.image2"
-          class="lg:mt-[13px] w-[100px] rounded-[10px]"
-        />
         <div
-          class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center"
+          class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center mt-16"
           v-html="mock.title"
         ></div>
         <div
@@ -122,7 +117,7 @@
         <div
           v-for="btn in mock.smallFontTextsUnderMainElementThatSayYouAreObligedToSellYourSoulToTheDevilAfterTransaction.buttons"
           v-html="btn.text"
-          @click="btn.action()"
+          @click="btn.action($router)"
           class="text-xs leading-none py-[6px] px-[10px] text-white bg-[#FFFFFF4D] border border-white rounded-[5px] cursor-pointer"
         ></div>
       </div>
@@ -140,7 +135,6 @@ import { mock } from '@/utils/mocks/private';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
-import { formatWallet } from '@/composables/formatWallet';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect } = useWallet()
