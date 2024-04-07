@@ -1,4 +1,4 @@
-import { kSupportedTokens } from '@/composables/Tokens';
+import { kSupportedTokens, type Token } from '@/composables/Tokens';
 import * as web3 from '@solana/web3.js';
 import * as spl from '@solana/spl-token';
 
@@ -38,10 +38,6 @@ export class SolanaManager {
             console.error('getWalletBalance', err);
         }
 
-        return {amount: 0, uiAmount: 0};
-    }
-
-    static async getWithdrawnAmount(walletAddress: string, tokenAddress: string): Promise<Amount> {        
         return {amount: 0, uiAmount: 0};
     }
 
@@ -215,6 +211,89 @@ export class SolanaManager {
                 throw error;
             }
         }
+    }
+
+    static async getContributors(boxWalletAddress: string, token: Token): Promise<{
+        contributors: {wallet: string, amount: string, name?: string, comment?: string}[],
+        withdrawn: number,
+        transactionsCount?: number,
+        uniqueWalletsCount?: number
+    }> {
+        console.log('getContributors', boxWalletAddress);
+        const web3Conn = this.newConnection();
+        const boxPublicKey = new web3.PublicKey(boxWalletAddress);
+        let withdrawn = 0;
+        let transactionsCount = 0;
+        const uniqueWallets: string[] = [];
+        const contributors: {wallet: string, amount: string, name?: string, comment?: string}[] = [];
+
+        const signatures = await web3Conn.getSignaturesForAddress(boxPublicKey, {limit: 1000});
+        if (signatures && signatures.length > 0){
+            const signs = signatures.map((signature) => signature.signature);
+            const transactions = await web3Conn.getParsedTransactions(signs);
+            if (transactions && transactions.length > 0){
+                for (const transaction of transactions) {
+                    if (transaction && !transaction.meta?.err){
+                        const instructions = transaction.transaction.message.instructions;
+                        let walletAddress = '';
+                        let lamports = 0;
+                        let memo = '';
+
+                        for (const instruction of instructions) {
+                            const inst: any = instruction;
+                            if (inst.program == 'spl-memo'){
+                                memo = inst.parsed;
+                            }
+                            else if (inst.program == 'system' && inst.parsed.type == 'transfer'){
+                                // SOL transfer
+                                if (inst.parsed.info.lamports > 0){
+                                    if (inst.parsed.info.destination == boxWalletAddress){
+                                        walletAddress = inst.parsed.info.source;
+                                        lamports = inst.parsed.info.lamports;
+                                        transactionsCount++;
+                                        if (!uniqueWallets.includes(walletAddress)){ uniqueWallets.push(walletAddress); }
+                                    }
+                                    else if (inst.parsed.info.source == boxWalletAddress){
+                                        withdrawn += inst.parsed.info.lamports;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (lamports > 0){
+                            console.log('transaction', transaction);
+                            console.log('walletAddress', walletAddress, 'amount', lamports, 'memo', memo);
+
+                            const tmp = memo.split('||');
+                            let name = '';
+                            let comment = '';
+                            if (tmp.length > 0){
+                                name = tmp[0];
+                            }
+                            if (tmp.length > 1){
+                                comment = tmp[1];
+                            }
+
+                            contributors.push({
+                                wallet: walletAddress,
+                                amount: Math.floor((lamports / (10 ** token.decimals)) * 1000000)/1000000 + ' ' + token.name,
+                                name: name,
+                                comment: comment
+                            });
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return {
+            contributors: contributors,
+            withdrawn: withdrawn,
+            transactionsCount: transactionsCount,
+            uniqueWalletsCount: uniqueWallets.length
+
+        };
     }
 
 }
