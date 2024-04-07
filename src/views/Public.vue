@@ -119,6 +119,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field1Placeholder"
             v-model="field1"
+            maxlength="20"
           />
         </label>
 
@@ -130,6 +131,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field2Placeholder"
             v-model="field2"
+            maxlength="20"
           />
         </label>
 
@@ -247,7 +249,9 @@ const makeDonation = async () => {
       publicKey.value.toBase58(),
       boxPublicKey,
       dynamicData.value.tokenAddress,
-      amountInput.value.value
+      amountInput.value.value,
+      field1.value,
+      field2.value,
     );
     if (transaction){
         const connection = SolanaManager.newConnection();
