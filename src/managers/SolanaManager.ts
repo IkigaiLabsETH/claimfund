@@ -61,8 +61,8 @@ export class SolanaManager {
         return transaction;
     }
 
-    static async makeDonation(fromWalletAddress: string, toWalletAddress: string, tokenAddress: string, amount: number): Promise<web3.Transaction | undefined> {
-        console.log('makeDonation', fromWalletAddress, toWalletAddress, tokenAddress, amount);
+    static async makeDonation(fromWalletAddress: string, toWalletAddress: string, tokenAddress: string, amount: number, name?: string, comment?: string): Promise<web3.Transaction | undefined> {
+        console.log('makeDonation', fromWalletAddress, toWalletAddress, tokenAddress, amount, name, comment);
 
         const web3Conn = this.newConnection();
         const blockhash = (await web3Conn.getLatestBlockhash()).blockhash;
@@ -100,6 +100,17 @@ export class SolanaManager {
                 lamports: 0.001 * web3.LAMPORTS_PER_SOL
             })
         );
+
+        if ((name && name.length>0) || (comment && comment.length>0)){
+            const memo = ((name && name.length>0) ? name : '') + '||' + ((comment && comment.length>0) ? comment : '');
+            instructions.push(
+                new web3.TransactionInstruction({
+                    data: Buffer.from(memo),
+                    keys: [],
+                    programId: new web3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+                })
+            );
+        }
 
         transaction.add(...instructions);
         return transaction;

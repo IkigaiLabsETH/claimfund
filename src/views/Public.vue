@@ -100,7 +100,7 @@
               class="p-[5px] lg:px-[20px] lg:py-[10px] rounded-[10px] lg:rounded-[20px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs lg:text-sm leading-none lg:leading-5 cursor-pointer"
               v-for="option in kSupportedTokens.find(el => el.name == dynamicData.token)?.addValueButtons ?? mock.contribution.options"
               :key="option.title"
-              @click="amount += option.amount"
+              @click="amount = Math.round((amount + option.amount) * 1000000)/1000000"
             >
               <div
                 class="font-bold"
@@ -119,6 +119,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field1Placeholder"
             v-model="field1"
+            maxlength="20"
           />
         </label>
 
@@ -130,6 +131,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field2Placeholder"
             v-model="field2"
+            maxlength="20"
           />
         </label>
 
@@ -188,6 +190,7 @@ import { SolanaManager } from '@/managers/SolanaManager';
 import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
 import { kSupportedTokens } from '@/composables/Tokens';
+import { showToast } from '@/composables/toast'
 
 const route = useRoute(),
   router = useRouter();
@@ -238,6 +241,8 @@ const makeDonation = async () => {
     console.log('mike', 'makeDonation', amountInput.value.value);
     const boxPublicKey = '' + route.params.public_key;
 
+    showToast('Processing donation...', 'info');
+
     if (!publicKey?.value){
         //TODO: show error toast
         return;
@@ -247,7 +252,9 @@ const makeDonation = async () => {
       publicKey.value.toBase58(),
       boxPublicKey,
       dynamicData.value.tokenAddress,
-      amountInput.value.value
+      amountInput.value.value,
+      field1.value,
+      field2.value,
     );
     if (transaction){
         const connection = SolanaManager.newConnection();
