@@ -12,19 +12,19 @@ export const kSupportedTokens: Array<Token> = [
     name: 'SOL',
     addValueButtons: [
       {
-        amount: 5,
-        usd: 5,
-        title: "+5 USDC"
+        amount: 0.05,
+        usd: 10,
+        title: "+0.05 SOL"
       },
       {
-        amount: 25,
-        usd: 25,
-        title: "+25 USDC"
+        amount: 0.5,
+        usd: 100,
+        title: "+0.5 SOL"
       },
       {
-        amount: 50,
-        usd: 50,
-        title: "+50 USDC"
+        amount: 1,
+        usd: 200,
+        title: "+1 SOL"
       }
     ]
   },
@@ -56,19 +56,19 @@ export const kSupportedTokens: Array<Token> = [
     name: 'BONK',
     addValueButtons: [
       {
-        amount: 5,
+        amount: 200000,
         usd: 5,
-        title: "+5 USDC"
+        title: "+200k BONK"
       },
       {
-        amount: 25,
+        amount: 1000000,
         usd: 25,
-        title: "+25 USDC"
+        title: "+1M BONK"
       },
       {
-        amount: 50,
+        amount: 2000000,
         usd: 50,
-        title: "+50 USDC"
+        title: "+2M BONK"
       }
     ]
   },
