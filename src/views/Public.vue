@@ -241,10 +241,8 @@ const makeDonation = async () => {
     console.log('mike', 'makeDonation', amountInput.value.value);
     const boxPublicKey = '' + route.params.public_key;
 
-    showToast('Processing donation...', 'info');
-
     if (!publicKey?.value){
-        //TODO: show error toast
+        showToast('Public key is not defined', 'error');
         return;
     }
 
@@ -261,9 +259,11 @@ const makeDonation = async () => {
         const signature = await sendTransaction(transaction, connection);
         const res = await connection.confirmTransaction(signature, 'confirmed');
         console.log('mike', 'signature', signature, 'res', res);
+        showToast('Success', 'success');
+
     }
     else {
-        //TODO: show error toast
+        showToast('Transaction was not created. Try again.', 'error');
     }
 }
 
