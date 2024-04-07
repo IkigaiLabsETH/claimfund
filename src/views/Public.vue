@@ -242,14 +242,14 @@ const makeDonation = async () => {
     const boxPublicKey = '' + route.params.public_key;
 
     if (!publicKey?.value){
-        showToast('Public key is not defined', 'error');
+        showToast('Wallet is not connected', 'error');
         return;
     }
 
     const transaction = await SolanaManager.makeDonation(
       publicKey.value.toBase58(),
       boxPublicKey,
-      dynamicData.value.tokenAddress,
+      dynamicData.value.tokenAddress || '',
       amountInput.value.value,
       field1.value,
       field2.value,
@@ -260,7 +260,6 @@ const makeDonation = async () => {
         const res = await connection.confirmTransaction(signature, 'confirmed');
         console.log('mike', 'signature', signature, 'res', res);
         showToast('Success', 'success');
-
     }
     else {
         showToast('Transaction was not created. Try again.', 'error');

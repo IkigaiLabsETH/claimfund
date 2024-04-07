@@ -140,17 +140,55 @@ import { useRoute, useRouter } from "vue-router";
 import { SolanaManager } from '@/managers/SolanaManager';
 import { TipLink } from '@tiplink/api';
 import { Helpers } from '@/managers/Helpers';
+import { showToast } from '@/composables/toast'
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet()
+  { publicKey, disconnect, sendTransaction } = useWallet()
 
 const route = useRoute(),
   router = useRouter();
 
 
-const claim = () => {
-  alert('claim');
-  
+const claim = async () => {
+    const tiplinkHash = '' + route.params.private_key;
+    const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+    const boxKeypair = tiplink.keypair;
+    const boxPublicKey = boxKeypair.publicKey.toBase58();
+
+    let dynamicData:any = {value:{tokenAddress: 'SOL'}};//TODO: remove this line
+    
+    if (!publicKey?.value){
+        showToast('Wallet is not connected', 'error');
+        return;
+    }
+
+    const balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    console.log('mike', 'claim balance:', balance);
+
+    if (balance <= 0) {
+        showToast('Nothing to claim', 'error');
+        return;
+    }
+
+    const transaction = await SolanaManager.claimDonations(
+        boxPublicKey,
+        publicKey.value.toBase58(),
+        dynamicData.value.tokenAddress || '',
+        balance,
+    );
+    transaction?.partialSign(boxKeypair);
+    if (transaction){
+        const connection = SolanaManager.newConnection();
+        const signature = await sendTransaction(transaction, connection);
+        const res = await connection.confirmTransaction(signature, 'confirmed');
+        console.log('mike', 'signature', signature, 'res', res);
+        showToast('Success', 'success');
+    }
+    else {
+        showToast('Transaction was not created. Try again.', 'error');
+    }
+
+
 }
 
 const init = async () => {
