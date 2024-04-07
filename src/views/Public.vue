@@ -263,7 +263,6 @@ const makeDonation = async () => {
 
     }
     else {
-        //TODO: show error toast
         showToast('Transaction was not created. Try again.', 'error');
     }
 }
