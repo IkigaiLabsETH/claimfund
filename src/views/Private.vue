@@ -140,11 +140,108 @@ import { mock } from '@/utils/mocks/private';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
+import { MetaplexManager } from '@/managers/MetaplexManager';
+import { useRoute, useRouter } from "vue-router";
+import { SolanaManager } from '@/managers/SolanaManager';
+import { TipLink } from '@tiplink/api';
+import { Helpers } from '@/managers/Helpers';
+import { showToast } from '@/composables/toast'
 import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet(),
+  { publicKey, disconnect, sendTransaction } = useWallet(),
   contributionsPopupOpened = ref(false)
+
+const route = useRoute(),
+  router = useRouter();
+
+
+const claim = async () => {
+    const tiplinkHash = '' + route.params.private_key;
+    const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+    const boxKeypair = tiplink.keypair;
+    const boxPublicKey = boxKeypair.publicKey.toBase58();
+
+    let dynamicData:any = {value:{tokenAddress: 'SOL'}};//TODO: remove this line
+    
+    if (!publicKey?.value){
+        showToast('Wallet is not connected', 'error');
+        return;
+    }
+
+    const balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    console.log('mike', 'claim balance:', balance);
+
+    if (balance <= 0) {
+        showToast('Nothing to claim', 'error');
+        return;
+    }
+
+    const transaction = await SolanaManager.claimDonations(
+        boxPublicKey,
+        publicKey.value.toBase58(),
+        dynamicData.value.tokenAddress || '',
+        balance,
+    );
+    transaction?.partialSign(boxKeypair);
+    if (transaction){
+        const connection = SolanaManager.newConnection();
+        const signature = await sendTransaction(transaction, connection);
+        const res = await connection.confirmTransaction(signature, 'confirmed');
+        console.log('mike', 'signature', signature, 'res', res);
+        showToast('Success', 'success');
+    }
+    else {
+        showToast('Transaction was not created. Try again.', 'error');
+    }
+
+
+}
+
+const init = async () => {
+  const tiplinkHash = '' + route.params.private_key;
+  const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+  const keypair = tiplink.keypair;
+  const boxPublicKey = keypair.publicKey.toBase58();
+
+  const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+  if (!assets || assets.length == 0) {
+    router.push('error');
+  }
+  else {
+    const asset = assets[0];
+    console.log('mike', 'asset:', asset);
+
+    let dynamicData:any = {};//TODO: remove this line
+
+    asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
+      if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
+      else if (attribute.key == 'description') { dynamicData.value.description = attribute.value; }
+      else if (attribute.key == 'host') { dynamicData.value.host = Helpers.truncateString(attribute.value, 8); }
+      else if (attribute.key == 'token') { dynamicData.value.token = attribute.value; }
+      else if (attribute.key == 'tokenAddress') { dynamicData.value.tokenAddress = attribute.value; }
+      else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
+    });
+
+    // get balance from blockchain
+    dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    dynamicData.value.contributors = 0;
+    dynamicData.value.transactions = 0;
+
+    console.log('mike', 'title:', dynamicData.value.title);
+    console.log('mike', 'description:', dynamicData.value.description);
+    console.log('mike', 'host:', dynamicData.value.host);
+    console.log('mike', 'token:', dynamicData.value.token);
+    console.log('mike', 'tokenAddress:', dynamicData.value.tokenAddress);
+    console.log('mike', 'goal:', dynamicData.value.goal);
+    console.log('mike', 'balance:', dynamicData.value.balance);
+    console.log('mike', 'withdrawn:', dynamicData.value.withdrawn);
+    console.log('mike', 'contributors:', dynamicData.value.contributors);
+    console.log('mike', 'transactions:', dynamicData.value.transactions);
+  }
+}
+init();
 
 const claim = () => {
   alert('claim');

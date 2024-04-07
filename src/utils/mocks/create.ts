@@ -84,7 +84,7 @@ export const mock = new Create(
     description: "Here is your Piggy Box manage link. Store it in the safe place. Don’t share it with anyone - link is your wallet!<br/><br/>If you loose this link - you won’t be able to restore the funds."
   },
   {
-    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='' target='blank_'>Privacy Policy</a> and <a href='' target='blank_'>Terms of Use</a>.",
+    text: "Claim Fund is not responsible for any fundraising.<br/>By making a donation you accept our <a href='https://docs.claim.fund/privacy-policy' target='blank_'>Privacy Policy</a> and <a href='https://docs.claim.fund/terms-of-use' target='blank_'>Terms of Use</a>.",
     buttons: []
   }
 )

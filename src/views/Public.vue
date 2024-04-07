@@ -100,7 +100,7 @@
               class="p-[5px] lg:px-[20px] lg:py-[10px] rounded-[10px] lg:rounded-[20px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs lg:text-sm leading-none lg:leading-5 cursor-pointer"
               v-for="option in kSupportedTokens.find(el => el.name == dynamicData.token)?.addValueButtons ?? mock.contribution.options"
               :key="option.title"
-              @click="amount += option.amount"
+              @click="amount = Math.round((amount + option.amount) * 1000000)/1000000"
             >
               <div
                 class="font-bold"
@@ -119,6 +119,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field1Placeholder"
             v-model="field1"
+            maxlength="20"
           />
         </label>
 
@@ -130,6 +131,7 @@
             class="placeholder:text-[#8F8F8F] w-full h-full lg:h-fit"
             :placeholder="mock.contribution.field2Placeholder"
             v-model="field2"
+            maxlength="20"
           />
         </label>
 
@@ -142,8 +144,8 @@
         <div
           v-else
           class="w-full p-[10px] bg-black rounded-[5px] text-white text-sm leading-5 text-center lg:mx-[25px] lg:w-auto lg:mt-5 cursor-pointer"
-          @click="disconnect"
-        >{{ formatWallet(publicKey.toString()) }}</div>
+          @click="makeDonation"
+        >Make donation</div>
 
         <div class="w-full h-[1px] bg-[#D7D7D7] shrink-0"></div>
 
@@ -193,8 +195,10 @@ import { formatWallet } from '@/composables/formatWallet'
 import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
 import { SolanaManager } from '@/managers/SolanaManager';
+import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
 import { kSupportedTokens } from '@/composables/Tokens';
+import { showToast } from '@/composables/toast'
 import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const route = useRoute(),
@@ -206,7 +210,7 @@ const amount = ref(0),
   field2 = ref(""),
   amountInput = ref(),
   walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect } = useWallet(),
+  { publicKey, disconnect, sendTransaction } = useWallet(),
   dynamicData: Ref<{
     title: null | string,
     description: null | string,
@@ -239,8 +243,37 @@ watch(amount, () => {
 })
 
 const applyAmount = () => {
-  console.log(amountInput.value.value > 9_999_999)
-  if (amountInput.value.value > 9_999_999) return amountInput.value.value = 9_999_999;
+  console.log(amountInput.value.value > 9_999_999_999)
+  if (amountInput.value.value > 9_999_999_999) return amountInput.value.value = 9_999_999_999;
+}
+
+const makeDonation = async () => {
+    console.log('mike', 'makeDonation', amountInput.value.value);
+    const boxPublicKey = '' + route.params.public_key;
+
+    if (!publicKey?.value){
+        showToast('Wallet is not connected', 'error');
+        return;
+    }
+
+    const transaction = await SolanaManager.makeDonation(
+      publicKey.value.toBase58(),
+      boxPublicKey,
+      dynamicData.value.tokenAddress || '',
+      amountInput.value.value,
+      field1.value,
+      field2.value,
+    );
+    if (transaction){
+        const connection = SolanaManager.newConnection();
+        const signature = await sendTransaction(transaction, connection);
+        const res = await connection.confirmTransaction(signature, 'confirmed');
+        console.log('mike', 'signature', signature, 'res', res);
+        showToast('Success', 'success');
+    }
+    else {
+        showToast('Transaction was not created. Try again.', 'error');
+    }
 }
 
 const init = async () => {
@@ -256,7 +289,7 @@ const init = async () => {
     asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
       if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
       else if (attribute.key == 'description') { dynamicData.value.description = attribute.value; }
-      else if (attribute.key == 'host') { dynamicData.value.host = attribute.value; }
+      else if (attribute.key == 'host') { dynamicData.value.host = Helpers.truncateString(attribute.value, 8); }
       else if (attribute.key == 'token') { dynamicData.value.token = attribute.value; }
       else if (attribute.key == 'tokenAddress') { dynamicData.value.tokenAddress = attribute.value; }
       else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
@@ -274,9 +307,6 @@ const init = async () => {
     console.log('mike', 'goal:', dynamicData.value.goal);
     console.log('mike', 'balance:', dynamicData.value.balance);
     console.log('mike', 'withdrawn:', dynamicData.value.withdrawn);
-
-    //TODO: Herman, please add the following to the mock data: 
-    // title, description, host, token, goal, balance, withdrawn
   }
 }
 init();

@@ -45,10 +45,10 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
-            @click="copy(`https://claim.fund/box/${ownPublicKey}`)"
+            @click="copy(`https://claim.fund/public/${ownPublicKey}`)"
           >
             <div class="w-[inherit] overflow-hidden text-ellipsis">
-              https://claim.fund/box/{{ ownPublicKey }}
+              https://claim.fund/public/{{ ownPublicKey }}
             </div>
             <img
               src="@/assets/copy.svg"
@@ -157,10 +157,10 @@
 
           <div
             class="w-full h-[40px] border border-[#8F8F8F] rounded-[5px] px-5 py-2.5 flex flex-row justify-between items-center cursor-pointer"
-            @click="copy(`https://claim.fund/manage/${ownPrivateKey}`)"
+            @click="copy(`https://claim.fund/private/${ownPrivateKey}`)"
           >
             <div class="w-[inherit] overflow-hidden text-ellipsis">
-              https://claim.fund/manage/{{ ownPrivateKey }}
+              https://claim.fund/private/{{ ownPrivateKey }}
             </div>
             <img
               src="@/assets/copy.svg"

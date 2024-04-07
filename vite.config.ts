@@ -36,11 +36,4 @@ export default defineConfig({
       plugins: [NodeGlobalsPolyfillPlugin({ buffer: true })],
     },
   },
-//   optimizeDeps: {
-//     esbuildOptions: {
-//         define: {
-//             global: "globalThis",
-//         },
-//     }
-//   }
 })
