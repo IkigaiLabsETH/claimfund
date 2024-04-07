@@ -46,10 +46,10 @@ class Index {
 }
 
 export const mock = new Index(
-  "Help for Ukraine.<br/>Charity fund to help military.",
+  "",
   "image1.png",
   "image2.png",
-  "Some description. Some description.<br/>Some description. Some description. Some description. Some description. Some description. ",
+  "",
   {
     text: "Share to:",
     btns: [
@@ -74,10 +74,10 @@ export const mock = new Index(
   },
   {
     currency: "USDC",
-    balance: 123_456,
+    balance: 0,
     withdrawn: 0,
-    goal: 1_000_000,
-    host: '1234...abcd'
+    goal: 0,
+    host: ''
   },
   {
     title: "Top up amount 💸",
