@@ -100,7 +100,7 @@
               class="p-[5px] lg:px-[20px] lg:py-[10px] rounded-[10px] lg:rounded-[20px] border border-[#8F8F8F] flex flex-col justify-center items-center text-xs lg:text-sm leading-none lg:leading-5 cursor-pointer"
               v-for="option in kSupportedTokens.find(el => el.name == dynamicData.token)?.addValueButtons ?? mock.contribution.options"
               :key="option.title"
-              @click="amount = Math.round((amount + option.amount) * 1000000)/1000000"
+              @click="amount = Math.round((amount + option.amount) * 1000000) / 1000000"
             >
               <div
                 class="font-bold"
@@ -149,7 +149,10 @@
 
         <div class="w-full h-[1px] bg-[#D7D7D7] shrink-0"></div>
 
-        <div class="flex flex-row gap-[10px] justify-center items-center cursor-pointer">
+        <div
+          class="flex flex-row gap-[10px] justify-center items-center cursor-pointer"
+          @click="contributionsPopupOpened = true"
+        >
           <img src="@/assets/contribution.svg" />
           <div
             class="text-sm font-bold leading-5 text-[#8F8F8F]"
@@ -174,6 +177,11 @@
         ></div>
       </div>
     </main>
+
+    <ContributionsPopup
+      :isModalOpened="contributionsPopupOpened"
+      @close="contributionsPopupOpened = false"
+    />
   </div>
 </template>
 
@@ -191,11 +199,13 @@ import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
 import { kSupportedTokens } from '@/composables/Tokens';
 import { showToast } from '@/composables/toast'
+import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const route = useRoute(),
   router = useRouter();
 
 const amount = ref(0),
+  contributionsPopupOpened = ref(false),
   field1 = ref(""),
   field2 = ref(""),
   amountInput = ref(),
@@ -238,39 +248,39 @@ const applyAmount = () => {
 }
 
 const makeDonation = async () => {
-    console.log('mike', 'makeDonation', amountInput.value.value);
-    const boxPublicKey = '' + route.params.public_key;
+  console.log('mike', 'makeDonation', amountInput.value.value);
+  const boxPublicKey = '' + route.params.public_key;
 
-    if (!publicKey?.value){
-        showToast('Wallet is not connected', 'error');
-        return;
-    }
+  if (!publicKey?.value) {
+    showToast('Wallet is not connected', 'error');
+    return;
+  }
 
-    const transaction = await SolanaManager.makeDonation(
-      publicKey.value.toBase58(),
-      boxPublicKey,
-      dynamicData.value.tokenAddress || '',
-      amountInput.value.value,
-      field1.value,
-      field2.value,
-    );
-    if (transaction){
-        const connection = SolanaManager.newConnection();
-        const signature = await sendTransaction(transaction, connection);
-        const res = await connection.confirmTransaction(signature, 'confirmed');
-        console.log('mike', 'signature', signature, 'res', res);
-        showToast('Success', 'success');
-    }
-    else {
-        showToast('Transaction was not created. Try again.', 'error');
-    }
+  const transaction = await SolanaManager.makeDonation(
+    publicKey.value.toBase58(),
+    boxPublicKey,
+    dynamicData.value.tokenAddress || '',
+    amountInput.value.value,
+    field1.value,
+    field2.value,
+  );
+  if (transaction) {
+    const connection = SolanaManager.newConnection();
+    const signature = await sendTransaction(transaction, connection);
+    const res = await connection.confirmTransaction(signature, 'confirmed');
+    console.log('mike', 'signature', signature, 'res', res);
+    showToast('Success', 'success');
+  }
+  else {
+    showToast('Transaction was not created. Try again.', 'error');
+  }
 }
 
 const init = async () => {
   const boxPublicKey = '' + route.params.public_key;
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
   if (!assets || assets.length == 0) {
-    router.push('error');
+    router.push({ name: 'error' });
   }
   else {
     const asset = assets[0];

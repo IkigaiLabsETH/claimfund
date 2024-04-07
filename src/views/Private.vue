@@ -13,11 +13,11 @@
       >
         <div
           class="font-bold text-[10px] lg:text-2xl leading-[34px] text-center mt-16"
-          v-html="mock.title"
+          v-html="dynamicData.title ?? mock.title"
         ></div>
         <div
           class="text-base leading-5 text-[#656565] text-center lg:mt-2 lg:text-lg lg:leading-5"
-          v-html="mock.description"
+          v-html="dynamicData.description ?? mock.description"
         ></div>
 
         <div class="text-base text-[#686868] flex flex-row items-center gap-[5px] flex-wrap lg:flex-nowrap">
@@ -27,7 +27,7 @@
               v-for="item in mock.shareTo.btns"
               class="p-[5px] text-white cursor-pointer flex items-center"
               :style="`background-color: ${item.bgColor}`"
-              @click="useShare(item.actionLink, '', mock.title)"
+              @click="useShare(item.actionLink, '', dynamicData.title ?? mock.title)"
               v-html="item.text"
             ></div>
           </div>
@@ -39,15 +39,15 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Host</div>
-              <div v-html="mock.stats.host"></div>
+              <div v-html="dynamicData.host ?? mock.stats.host"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Contributors</div>
-              <div v-html="mock.stats.contributors"></div>
+              <div v-html="dynamicData.contributors ?? mock.stats.contributors"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Transactions</div>
-              <div v-html="mock.stats.transactions"></div>
+              <div v-html="dynamicData.transactions ?? mock.stats.transactions"></div>
             </div>
           </div>
 
@@ -56,15 +56,15 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Balance</div>
-              <div v-html="`${useFormatter(mock.stats.balance)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.balance ?? mock.stats.balance)} ${mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Withdraw</div>
-              <div v-html="`${useFormatter(mock.stats.withdrawn)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.withdrawn ?? mock.stats.withdrawn)} ${mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Goal</div>
-              <div v-html="`${useFormatter(mock.stats.goal)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(+dynamicData.goal! ?? mock.stats.goal)} ${mock.stats.currency}`"></div>
             </div>
           </div>
         </div>
@@ -80,13 +80,16 @@
           ></div>
           <div class="font-bold flex flex-col gap-[10px] justify-center items-center leading-none text-[#8F8F8F]">
             <div class="text-[30px] lg:text-[50px] leading-none flex flex-row gap-[1ch]">
-              <div v-html="mock.claim.balance"></div>
-              <div v-html="mock.stats.currency"></div>
+              <div v-html="dynamicData.balance ?? mock.claim.balance"></div>
+              <div v-html="dynamicData.token ?? mock.stats.currency"></div>
             </div>
           </div>
         </div>
 
-        <div class="flex flex-row gap-[10px] justify-center items-center cursor-pointer">
+        <div
+          class="flex flex-row gap-[10px] justify-center items-center cursor-pointer"
+          @click="contributionsPopupOpened = true"
+        >
           <img src="@/assets/contribution.svg" />
           <div
             class="text-sm font-bold leading-5 text-[#8F8F8F]"
@@ -122,17 +125,19 @@
         ></div>
       </div>
     </main>
+
+    <ContributionsPopup
+      :isModalOpened="contributionsPopupOpened"
+      @close="contributionsPopupOpened = false"
+    />
   </div>
 </template>
 
-<script
-  setup
-  lang="ts"
->
+<script setup lang="ts">
 import { useFormatter } from '@/composables/currencyFormatter';
 import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/private';
-import { inject, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch, type Ref } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
 import { MetaplexManager } from '@/managers/MetaplexManager';
@@ -141,52 +146,75 @@ import { SolanaManager } from '@/managers/SolanaManager';
 import { TipLink } from '@tiplink/api';
 import { Helpers } from '@/managers/Helpers';
 import { showToast } from '@/composables/toast'
+import ContributionsPopup from '@/components/ContributionsPopup.vue';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
-  { publicKey, disconnect, sendTransaction } = useWallet()
+  { publicKey, disconnect, sendTransaction } = useWallet(),
+  contributionsPopupOpened = ref(false)
 
 const route = useRoute(),
-  router = useRouter();
+  router = useRouter(),
+  dynamicData: Ref<{
+    title: null | string,
+    description: null | string,
+    host: null | string,
+    token: null | string,
+    tokenAddress: null | string,
+    goal: null | string,
+    balance: null | number,
+    withdrawn: null | number,
+    contributors: any,
+    transactions: any
+  }> = ref({
+    title: null,
+    description: null,
+    host: null,
+    token: null,
+    tokenAddress: null,
+    goal: null,
+    balance: null,
+    withdrawn: null,
+    contributors: [],
+    transactions: []
+  })
 
 
 const claim = async () => {
-    const tiplinkHash = '' + route.params.private_key;
-    const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
-    const boxKeypair = tiplink.keypair;
-    const boxPublicKey = boxKeypair.publicKey.toBase58();
+  const tiplinkHash = '' + route.params.private_key;
+  const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+  const boxKeypair = tiplink.keypair;
+  const boxPublicKey = boxKeypair.publicKey.toBase58();
 
-    let dynamicData:any = {value:{tokenAddress: 'SOL'}};//TODO: remove this line
-    
-    if (!publicKey?.value){
-        showToast('Wallet is not connected', 'error');
-        return;
-    }
+  if (!publicKey?.value) {
+    showToast('Wallet is not connected', 'error');
+    return;
+  }
 
-    const balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
-    console.log('mike', 'claim balance:', balance);
+  const balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+  console.log('mike', 'claim balance:', balance);
 
-    if (balance <= 0) {
-        showToast('Nothing to claim', 'error');
-        return;
-    }
+  if (balance <= 0) {
+    showToast('Nothing to claim', 'error');
+    return;
+  }
 
-    const transaction = await SolanaManager.claimDonations(
-        boxPublicKey,
-        publicKey.value.toBase58(),
-        dynamicData.value.tokenAddress || '',
-        balance,
-    );
-    transaction?.partialSign(boxKeypair);
-    if (transaction){
-        const connection = SolanaManager.newConnection();
-        const signature = await sendTransaction(transaction, connection);
-        const res = await connection.confirmTransaction(signature, 'confirmed');
-        console.log('mike', 'signature', signature, 'res', res);
-        showToast('Success', 'success');
-    }
-    else {
-        showToast('Transaction was not created. Try again.', 'error');
-    }
+  const transaction = await SolanaManager.claimDonations(
+    boxPublicKey,
+    publicKey.value.toBase58(),
+    dynamicData.value.tokenAddress || '',
+    balance,
+  );
+  transaction?.partialSign(boxKeypair);
+  if (transaction) {
+    const connection = SolanaManager.newConnection();
+    const signature = await sendTransaction(transaction, connection);
+    const res = await connection.confirmTransaction(signature, 'confirmed');
+    console.log('mike', 'signature', signature, 'res', res);
+    showToast('Success', 'success');
+  }
+  else {
+    showToast('Transaction was not created. Try again.', 'error');
+  }
 
 
 }
@@ -199,13 +227,11 @@ const init = async () => {
 
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
   if (!assets || assets.length == 0) {
-    router.push('error');
+    router.push({ name: 'error' });
   }
   else {
     const asset = assets[0];
     console.log('mike', 'asset:', asset);
-
-    let dynamicData:any = {};//TODO: remove this line
 
     asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
       if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
@@ -234,13 +260,13 @@ const init = async () => {
     console.log('mike', 'transactions:', dynamicData.value.transactions);
   }
 }
-init();
+
+onMounted(async () => {
+  await init();
+})
 </script>
 
-<style
-  lang="scss"
-  scoped
->
+<style lang="scss" scoped>
 .gradient-block {
   border: 3px solid transparent;
   background: linear-gradient(0deg, #fff, #fff) padding-box,
