@@ -30,7 +30,7 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       plugins: [
-        inject({ Buffer: ['Buffer', 'buffer'] }),
+        inject({ Buffer: ['Buffer', 'Buffer'] }),
         nodePolyfills({ crypto: true, buffer: true })
       ],
     },
