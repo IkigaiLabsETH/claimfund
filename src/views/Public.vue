@@ -190,6 +190,7 @@ import { SolanaManager } from '@/managers/SolanaManager';
 import { Helpers } from '@/managers/Helpers';
 import { useRoute, useRouter } from "vue-router";
 import { kSupportedTokens } from '@/composables/Tokens';
+import { showToast } from '@/composables/toast'
 
 const route = useRoute(),
   router = useRouter();
@@ -239,6 +240,8 @@ const applyAmount = () => {
 const makeDonation = async () => {
     console.log('mike', 'makeDonation', amountInput.value.value);
     const boxPublicKey = '' + route.params.public_key;
+
+    showToast('Processing donation...', 'info');
 
     if (!publicKey?.value){
         //TODO: show error toast
