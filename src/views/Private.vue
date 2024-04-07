@@ -135,13 +135,65 @@ import { mock } from '@/utils/mocks/private';
 import { inject, ref, watch } from 'vue';
 import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
 import { useWallet } from 'solana-wallets-vue';
+import { MetaplexManager } from '@/managers/MetaplexManager';
+import { useRoute, useRouter } from "vue-router";
+import { SolanaManager } from '@/managers/SolanaManager';
+import { TipLink } from '@tiplink/api';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect } = useWallet()
 
+const route = useRoute(),
+  router = useRouter();
+
+
 const claim = () => {
   alert('claim');
 }
+
+const init = async () => {
+  const tiplinkHash = '' + route.params.private_key;
+  const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+  
+
+  const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+  if (!assets || assets.length == 0) {
+    router.push('error');
+  }
+  else {
+    const asset = assets[0];
+    console.log('mike', 'asset:', asset);
+
+    let dynamicData:any = {};//TODO: remove this line
+
+    asset.attributes?.attributeList?.forEach((attribute: { key: string; value: string; }) => {
+      if (attribute.key == 'title') { dynamicData.value.title = attribute.value; }
+      else if (attribute.key == 'description') { dynamicData.value.description = attribute.value; }
+      else if (attribute.key == 'host') { dynamicData.value.host = Helpers.truncateString(attribute.value, 8); }
+      else if (attribute.key == 'token') { dynamicData.value.token = attribute.value; }
+      else if (attribute.key == 'tokenAddress') { dynamicData.value.tokenAddress = attribute.value; }
+      else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
+    });
+
+    // get balance from blockchain
+    dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    dynamicData.value.contributors = 0;
+    dynamicData.value.transactions = 0;
+
+    console.log('mike', 'title:', dynamicData.value.title);
+    console.log('mike', 'description:', dynamicData.value.description);
+    console.log('mike', 'host:', dynamicData.value.host);
+    console.log('mike', 'token:', dynamicData.value.token);
+    console.log('mike', 'tokenAddress:', dynamicData.value.tokenAddress);
+    console.log('mike', 'goal:', dynamicData.value.goal);
+    console.log('mike', 'balance:', dynamicData.value.balance);
+    console.log('mike', 'withdrawn:', dynamicData.value.withdrawn);
+    console.log('mike', 'contributors:', dynamicData.value.contributors);
+    console.log('mike', 'transactions:', dynamicData.value.transactions);
+  }
+}
+init();
 </script>
 
 <style
