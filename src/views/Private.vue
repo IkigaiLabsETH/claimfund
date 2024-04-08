@@ -247,8 +247,8 @@ const init = async () => {
       else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
     });
 
-    const contributorsData = await SolanaManager.getContributors(boxPublicKey);
     const token = kSupportedTokens.find(el => el.mintAddress == dynamicData.value.tokenAddress);
+    const contributorsData = await SolanaManager.getContributors(boxPublicKey, token!);
 
     // get balance from blockchain
     dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
