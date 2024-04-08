@@ -187,7 +187,7 @@ const route = useRoute(),
 
 const claim = async () => {
   const tiplinkHash = '' + route.params.private_key;
-  const tiplink = await TipLink.fromLink(`https://tiplink.io/${tiplinkHash}`)
+  const tiplink = await TipLink.fromLink(`https://tiplink.io/i#${tiplinkHash}`)
   const boxKeypair = tiplink.keypair;
   const boxPublicKey = boxKeypair.publicKey.toBase58();
 
