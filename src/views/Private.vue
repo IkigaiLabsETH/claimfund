@@ -56,15 +56,15 @@
           >
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Balance</div>
-              <div v-html="`${useFormatter(dynamicData.balance ?? mock.stats.balance)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.balance ?? mock.stats.balance)} ${dynamicData.token ?? mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Withdraw</div>
-              <div v-html="`${useFormatter(dynamicData.withdrawn ?? mock.stats.withdrawn)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(dynamicData.withdrawn ?? mock.stats.withdrawn)} ${dynamicData.token ?? mock.stats.currency}`"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Goal</div>
-              <div v-html="`${useFormatter(+dynamicData.goal! ?? mock.stats.goal)} ${mock.stats.currency}`"></div>
+              <div v-html="`${useFormatter(+dynamicData.goal! ?? mock.stats.goal)} ${dynamicData.token ?? mock.stats.currency}`"></div>
             </div>
           </div>
         </div>
