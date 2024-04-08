@@ -12,7 +12,7 @@
     >
       <div class="text-white">{{ mock.heading }}</div>
       <div
-        v-for="item in mock.contributions"
+        v-for="item in props.contributors"
         class="flex flex-row gap-5 text-[#FFFFFF4D]"
       >
         <div class="flex-shrink-0">{{ formatWallet(item.wallet) }}</div>
@@ -32,6 +32,6 @@ import { formatWallet } from '@/composables/formatWallet';
 import { mock } from '@/utils/mocks/contributions';
 import { defineProps, ref } from 'vue';
 
-const props = defineProps(['isModalOpened'])
+const props = defineProps(['isModalOpened', 'contributors'])
 const emits = defineEmits(['close'])
 </script>

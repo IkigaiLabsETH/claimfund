@@ -103,7 +103,7 @@
               @click="amount = Math.round((amount + option.amount) * 1000000) / 1000000"
             >
               <div
-                class="font-bold"
+                class="font-bold text-center"
                 v-html="option.title"
               ></div>
               <div class="text-[#8F8F8F]">{{ option.usd }}$</div>
@@ -180,6 +180,7 @@
 
     <ContributionsPopup
       :isModalOpened="contributionsPopupOpened"
+      :contributors="dynamicData"
       @close="contributionsPopupOpened = false"
     />
   </div>
