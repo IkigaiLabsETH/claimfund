@@ -128,6 +128,7 @@
 
     <ContributionsPopup
       :isModalOpened="contributionsPopupOpened"
+      :contributors="dynamicData.contributors"
       @close="contributionsPopupOpened = false"
     />
   </div>

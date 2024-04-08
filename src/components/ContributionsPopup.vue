@@ -7,7 +7,7 @@
     <div
       class="w-[90%] lg:w-[470px] mt-20 p-5 max-h-[400px] overflow-y-auto bg-[#181B208C] backdrop-blur-[20px] border border-[#FFFFFF1A] flex flex-col gap-2.5 duration-500 cursor-auto"
       :class="{ 'scale-100 opacity-100': props.isModalOpened, 'scale-50 opacity-50': !props.isModalOpened }"
-      v-if="mock.contributions"
+      v-if="props.contributors?.length > 0"
       @click.stop
     >
       <div class="text-white">{{ mock.heading }}</div>
