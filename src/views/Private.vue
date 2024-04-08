@@ -231,7 +231,9 @@ const init = async () => {
   const boxPublicKey = keypair.publicKey.toBase58();
 
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
+  console.log('mike', 'assets:', assets);
   if (!assets || assets.length == 0) {
+    console.log('mike', 'no assets');
     router.push({ name: 'error' });
   }
   else {

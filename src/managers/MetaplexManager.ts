@@ -5,6 +5,8 @@ import * as mplCore from '@metaplex-foundation/mpl-core';
 export class MetaplexManager {
 
     static async fetchAssetsByOwner(walletAddress: string) {
+        console.log('fetchAssetsByOwner', walletAddress);
+        
         const umi = createUmi(import.meta.env.VITE_APP_SOLANA_RPC!);
         umi.use(mplCore.mplCore());
 
