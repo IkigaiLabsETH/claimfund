@@ -48,7 +48,7 @@ export const mock = new Create(
     goalPlaceholder: "Goal",
     tokens: {
       placeholder: "Token",
-      options: ["SOL", "USDC", "BONK"]
+      options: ["SOL", "USDC", "BONK", "FORGE"]
     },
     emailPlaceholder: "Your email",
     connectWalletBtnText: "Connect Wallet"
