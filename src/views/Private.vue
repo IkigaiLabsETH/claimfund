@@ -43,11 +43,11 @@
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Contributors</div>
-              <div v-html="dynamicData.contributors ?? mock.stats.contributors"></div>
+              <div v-html="dynamicData.uniqueWalletsCount ?? mock.stats.contributors"></div>
             </div>
             <div class="flex flex-col lg:gap-[3px]">
               <div class="font-bold">Transactions</div>
-              <div v-html="dynamicData.transactions ?? mock.stats.transactions"></div>
+              <div v-html="dynamicData.transactionsCount ?? mock.stats.transactions"></div>
             </div>
           </div>
 
@@ -147,6 +147,7 @@ import { TipLink } from '@tiplink/api';
 import { Helpers } from '@/managers/Helpers';
 import { showToast } from '@/composables/toast'
 import ContributionsPopup from '@/components/ContributionsPopup.vue';
+import { kSupportedTokens } from '@/composables/Tokens';
 
 const walletModalProviderRef = inject('walletModalProviderRef'),
   { publicKey, disconnect, sendTransaction } = useWallet(),
@@ -164,7 +165,9 @@ const route = useRoute(),
     balance: null | number,
     withdrawn: null | number,
     contributors: any,
-    transactions: any
+    transactions: any,
+    uniqueWalletsCount: null | number,
+    transactionsCount: null | number,
   }> = ref({
     title: null,
     description: null,
@@ -175,7 +178,9 @@ const route = useRoute(),
     balance: null,
     withdrawn: null,
     contributors: [],
-    transactions: []
+    transactions: [],
+    uniqueWalletsCount: null,
+    transactionsCount: null,
   })
 
 
@@ -216,7 +221,6 @@ const claim = async () => {
     showToast('Transaction was not created. Try again.', 'error');
   }
 
-
 }
 
 const init = async () => {
@@ -242,11 +246,17 @@ const init = async () => {
       else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
     });
 
+    const token = kSupportedTokens.find(el => el.mintAddress == dynamicData.value.tokenAddress);
+    const contributorsData = await SolanaManager.getContributors(boxPublicKey, token!);
+
     // get balance from blockchain
     dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
-    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
-    dynamicData.value.contributors = 0;
-    dynamicData.value.transactions = 0;
+    dynamicData.value.withdrawn = contributorsData.withdrawn / (10 ** token!.decimals)
+    // dynamicData.value.contributors = contributorsData.uniqueWalletsCount;
+    // dynamicData.value.transactions = contributorsData.transactionsCount;
+    dynamicData.value.contributors = contributorsData.contributors;
+    dynamicData.value.uniqueWalletsCount = contributorsData.uniqueWalletsCount || null;
+    dynamicData.value.transactionsCount = contributorsData.transactionsCount || null;
 
     console.log('mike', 'title:', dynamicData.value.title);
     console.log('mike', 'description:', dynamicData.value.description);

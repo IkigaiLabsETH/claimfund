@@ -220,7 +220,11 @@ const amount = ref(0),
     tokenAddress: null | string,
     goal: null | string,
     balance: null | number,
-    withdrawn: null | number
+    withdrawn: null | number,
+    contributors: any,
+    transactions: any,
+    uniqueWalletsCount: null | number,
+    transactionsCount: null | number,
   }> = ref({
     title: null,
     description: null,
@@ -230,6 +234,10 @@ const amount = ref(0),
     goal: null,
     balance: null,
     withdrawn: null,
+    contributors: [],
+    transactions: [],
+    uniqueWalletsCount: null,
+    transactionsCount: null,
   })
 
 watch(amountInput, () => {
@@ -296,9 +304,15 @@ const init = async () => {
       else if (attribute.key == 'goal') { dynamicData.value.goal = attribute.value; }
     });
 
+    const token = kSupportedTokens.find(el => el.mintAddress == dynamicData.value.tokenAddress);
+
     // get balance from blockchain
     dynamicData.value.balance = (await SolanaManager.getWalletBalance(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
-    dynamicData.value.withdrawn = (await SolanaManager.getWithdrawnAmount(boxPublicKey, dynamicData.value.tokenAddress!)).uiAmount;
+    const contributorsData = await SolanaManager.getContributors(boxPublicKey, token!);
+    dynamicData.value.withdrawn = contributorsData.withdrawn / (10 ** token!.decimals)
+    dynamicData.value.contributors = contributorsData.contributors;
+    dynamicData.value.uniqueWalletsCount = contributorsData.uniqueWalletsCount || null;
+    dynamicData.value.transactionsCount = contributorsData.transactionsCount || null;
 
     console.log('mike', 'title:', dynamicData.value.title);
     console.log('mike', 'description:', dynamicData.value.description);
