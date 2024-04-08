@@ -78,7 +78,7 @@ export const mock = new Private(
   },
   {
     balanceTitle: "Balance",
-    balance: 100000,
+    balance: 0,
     contributionsText: "List of contributions",
     buttonText: "Claim",
     bottomWarningText: "This is your private vault page.<br/>Don’t share the link with anyone.<br/>If you share the link - that person will be able to claim all raised funds."
