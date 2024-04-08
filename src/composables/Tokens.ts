@@ -72,4 +72,27 @@ export const kSupportedTokens: Array<Token> = [
       }
     ]
   },
+  {
+    mintAddress: 'FoRGERiW7odcCBGU1bztZi16osPBHjxharvDathL5eds',
+    decimals: 9,
+    name: 'FORGE',
+    addValueButtons: [
+      {
+        amount: 100,
+        usd: 4,
+        title: "+100 FORGE"
+      },
+      {
+        amount: 250,
+        usd: 10,
+        title: "+250 FORGE"
+      },
+      {
+        amount: 1000,
+        usd: 40,
+        title: "+1k FORGE"
+      }
+    ]
+  },
+
 ];

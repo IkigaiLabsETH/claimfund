@@ -3,14 +3,17 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
-import nodePolyfills from "rollup-plugin-node-polyfills";
-import inject from '@rollup/plugin-inject'
+// import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
+// import nodePolyfills from "rollup-plugin-node-polyfills";
+// import inject from '@rollup/plugin-inject'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    nodePolyfills()
   ],
   resolve: {
     alias: {
@@ -30,18 +33,18 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       plugins: [
-        inject({ Buffer: ['Buffer', 'Buffer'] }),
-        nodePolyfills({ crypto: true, buffer: true })
+        // inject({ Buffer: ['Buffer', 'Buffer'] }),
+        // nodePolyfills({ crypto: true, buffer: true })
       ],
     },
   },
   optimizeDeps: {
     esbuildOptions: {
       plugins: [
-        NodeGlobalsPolyfillPlugin({
-            process: true,
-            buffer: true
-        })
+        // NodeGlobalsPolyfillPlugin({
+        //     process: true,
+        //     buffer: true
+        // })
       ],
     },
   },

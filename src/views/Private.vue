@@ -221,7 +221,6 @@ const claim = async () => {
     showToast('Transaction was not created. Try again.', 'error');
   }
 
-
 }
 
 const init = async () => {
