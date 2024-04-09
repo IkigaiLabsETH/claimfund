@@ -27,7 +27,7 @@
               v-for="item in mock.shareTo.btns"
               class="p-[5px] text-white cursor-pointer flex items-center"
               :style="`background-color: ${item.bgColor}`"
-              @click="useShare(item.actionLink, '', dynamicData.title ?? mock.title)"
+              @click="useShare(item.actionLink, publicKeyToShare, dynamicData.title ?? mock.title)"
               v-html="item.text"
             ></div>
           </div>
@@ -182,7 +182,8 @@ const route = useRoute(),
     transactions: [],
     uniqueWalletsCount: null,
     transactionsCount: null,
-  })
+  }),
+  publicKeyToShare = ref("")
 
 
 const claim = async () => {
@@ -231,6 +232,7 @@ const init = async () => {
   const keypair = tiplink.keypair;
   const boxPublicKey = keypair.publicKey.toBase58();
   console.log('mike', 'boxPublicKey:', boxPublicKey);
+  publicKeyToShare.value = boxPublicKey;
 
   const assets = await MetaplexManager.fetchAssetsByOwner(boxPublicKey);
   console.log('mike', 'assets:', assets);
